@@ -1,0 +1,15 @@
+﻿{
+  "applications": {
+    "Aqt.CoreOracle.Web": {
+      "type": "dotnet-project",
+      "launchUrl": "https://localhost:44388",
+      "path": "../../../src/Aqt.CoreOracle.Web/Aqt.CoreOracle.Web.csproj",
+      "kubernetesService": ".*-web$",
+      "healthCheckEndpoint": "/health-status",
+      "healthUiEndpoint": "/health-ui",
+      "execution": {
+        "order": 2
+      }
+    }
+  }
+}

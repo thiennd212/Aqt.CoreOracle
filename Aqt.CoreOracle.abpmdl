@@ -1,0 +1,105 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.LeptonXLiteTheme": {
+      "version": "4.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.Account": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.Identity": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "9.1.0",
+      "isInstalled": true
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "9.1.0",
+      "isInstalled": true
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "Aqt.CoreOracle.Application": {
+      "path": "src/Aqt.CoreOracle.Application/Aqt.CoreOracle.Application.abppkg",
+      "folder": "src"
+    },
+    "Aqt.CoreOracle.Application.Tests": {
+      "path": "test/Aqt.CoreOracle.Application.Tests/Aqt.CoreOracle.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "Aqt.CoreOracle.Domain.Shared": {
+      "path": "src/Aqt.CoreOracle.Domain.Shared/Aqt.CoreOracle.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "Aqt.CoreOracle.Application.Contracts": {
+      "path": "src/Aqt.CoreOracle.Application.Contracts/Aqt.CoreOracle.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "Aqt.CoreOracle.HttpApi": {
+      "path": "src/Aqt.CoreOracle.HttpApi/Aqt.CoreOracle.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "Aqt.CoreOracle.HttpApi.Client": {
+      "path": "src/Aqt.CoreOracle.HttpApi.Client/Aqt.CoreOracle.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "Aqt.CoreOracle.Web": {
+      "path": "src/Aqt.CoreOracle.Web/Aqt.CoreOracle.Web.abppkg",
+      "folder": "src"
+    },
+    "Aqt.CoreOracle.Web.Tests": {
+      "path": "test/Aqt.CoreOracle.Web.Tests/Aqt.CoreOracle.Web.Tests.abppkg",
+      "folder": "test"
+    },
+    "Aqt.CoreOracle.EntityFrameworkCore.Tests": {
+      "path": "test/Aqt.CoreOracle.EntityFrameworkCore.Tests/Aqt.CoreOracle.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "Aqt.CoreOracle.EntityFrameworkCore": {
+      "path": "src/Aqt.CoreOracle.EntityFrameworkCore/Aqt.CoreOracle.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "Aqt.CoreOracle.TestBase": {
+      "path": "test/Aqt.CoreOracle.TestBase/Aqt.CoreOracle.TestBase.abppkg",
+      "folder": "test"
+    },
+    "Aqt.CoreOracle.Domain.Tests": {
+      "path": "test/Aqt.CoreOracle.Domain.Tests/Aqt.CoreOracle.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "Aqt.CoreOracle.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/Aqt.CoreOracle.HttpApi.Client.ConsoleTestApp/Aqt.CoreOracle.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "Aqt.CoreOracle.DbMigrator": {
+      "path": "src/Aqt.CoreOracle.DbMigrator/Aqt.CoreOracle.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "Aqt.CoreOracle.Domain": {
+      "path": "src/Aqt.CoreOracle.Domain/Aqt.CoreOracle.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}
