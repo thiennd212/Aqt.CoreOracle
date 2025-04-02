@@ -81,6 +81,21 @@ public class CoreOracleDbContext :
         builder.ConfigureTenantManagement();
         builder.ConfigureBlobStoring();
 
+        builder.Entity<OpenIddictToken>(b =>
+        {
+            b.Property(q => q.Payload).HasColumnType("clob").HasMaxLength(4000);
+        });
+
+        builder.Entity<AuditLog>(b =>
+        {
+            b.Property(x => x.Exceptions).HasColumnType("clob").HasMaxLength(4000);
+        });
+
+        builder.Entity<AuditLogAction>(b =>
+        {
+            b.Property(x => x.Parameters).HasColumnType("clob").HasMaxLength(4000);
+        });
+
         /* Configure your own tables/entities inside here */
 
         //builder.Entity<YourEntity>(b =>
