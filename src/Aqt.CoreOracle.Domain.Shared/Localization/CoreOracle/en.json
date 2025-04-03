@@ -3,7 +3,26 @@
   "Texts": {
     "AppName": "CoreOracle",
     "Menu:Home": "Home",
-    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information visit",
-    "Welcome": "Welcome"
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+    "Welcome": "Welcome",
+    "Permission:CoreOracle": "Core Oracle",
+    "Permission:CategoryTypes": "Category Types",
+    "Permission:CategoryTypes.Create": "Create Category Type",
+    "Permission:CategoryTypes.Edit": "Edit Category Type",
+    "Permission:CategoryTypes.Delete": "Delete Category Type",
+    "Permission:CategoryItems": "Category Items",
+    "Permission:CategoryItems.Create": "Create Category Item",
+    "Permission:CategoryItems.Edit": "Edit Category Item",
+    "Permission:CategoryItems.Delete": "Delete Category Item",
+    "CategoryTypes": "Category Types",
+    "NewCategoryType": "New Category Type",
+    "EditCategoryType": "Edit Category Type",
+    "Code": "Code",
+    "Name": "Name",
+    "Description": "Description",
+    "IsActive": "Is Active",
+    "AllowMultipleSelect": "Allow Multiple Select",
+    "CategoryTypeDeletionConfirmationMessage": "Are you sure to delete the category type '{0}'?",
+    "SuccessfullyDeleted": "Successfully deleted"
   }
 }

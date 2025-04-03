@@ -16,6 +16,7 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Volo.Abp.AuditLogging;
 using Volo.Abp.OpenIddict.Tokens;
+using Aqt.CoreOracle.Categories;
 
 namespace Aqt.CoreOracle.EntityFrameworkCore;
 
@@ -57,6 +58,9 @@ public class CoreOracleDbContext :
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
 
+    public DbSet<CategoryType> CategoryTypes { get; set; }
+    public DbSet<CategoryItem> CategoryItems { get; set; }
+
     #endregion
 
     public CoreOracleDbContext(DbContextOptions<CoreOracleDbContext> options)
@@ -97,12 +101,6 @@ public class CoreOracleDbContext :
         });
 
         /* Configure your own tables/entities inside here */
-
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(CoreOracleConsts.DbTablePrefix + "YourEntities", CoreOracleConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+        builder.ApplyConfigurations();
     }
 }

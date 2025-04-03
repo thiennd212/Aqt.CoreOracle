@@ -9,10 +9,17 @@ public class CoreOraclePermissionDefinitionProvider : PermissionDefinitionProvid
 {
     public override void Define(IPermissionDefinitionContext context)
     {
-        var myGroup = context.AddGroup(CoreOraclePermissions.GroupName);
+        var coreOracleGroup = context.AddGroup(CoreOraclePermissions.GroupName, L("Permission:CoreOracle"));
 
-        //Define your own permissions here. Example:
-        //myGroup.AddPermission(CoreOraclePermissions.MyPermission1, L("Permission:MyPermission1"));
+        var categoryTypesPermission = coreOracleGroup.AddPermission(CoreOraclePermissions.CategoryTypes.Default, L("Permission:CategoryTypes"));
+        categoryTypesPermission.AddChild(CoreOraclePermissions.CategoryTypes.Create, L("Permission:CategoryTypes.Create"));
+        categoryTypesPermission.AddChild(CoreOraclePermissions.CategoryTypes.Edit, L("Permission:CategoryTypes.Edit"));
+        categoryTypesPermission.AddChild(CoreOraclePermissions.CategoryTypes.Delete, L("Permission:CategoryTypes.Delete"));
+
+        var categoryItemsPermission = coreOracleGroup.AddPermission(CoreOraclePermissions.CategoryItems.Default, L("Permission:CategoryItems"));
+        categoryItemsPermission.AddChild(CoreOraclePermissions.CategoryItems.Create, L("Permission:CategoryItems.Create"));
+        categoryItemsPermission.AddChild(CoreOraclePermissions.CategoryItems.Edit, L("Permission:CategoryItems.Edit"));
+        categoryItemsPermission.AddChild(CoreOraclePermissions.CategoryItems.Delete, L("Permission:CategoryItems.Delete"));
     }
 
     private static LocalizableString L(string name)

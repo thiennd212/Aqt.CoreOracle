@@ -1,0 +1,75 @@
+@page
+@using Aqt.CoreOracle.Permissions
+@using Aqt.CoreOracle.Web.Pages.Categories.CategoryItems
+@using Microsoft.AspNetCore.Authorization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@using Aqt.CoreOracle.Localization
+@using Microsoft.Extensions.Localization
+@model IndexModel
+@inject IStringLocalizer<CoreOracleResource> L
+@inject IAuthorizationService AuthorizationService
+@inject IPageLayout PageLayout
+@{
+    PageLayout.Content.Title = L["CategoryItems"].Value;
+    PageLayout.Content.BreadCrumb.Add(L["Menu:Categories"].Value);
+    PageLayout.Content.MenuItemName = "Categories";
+}
+
+@section scripts {
+    <abp-script src="/Pages/Categories/CategoryItems/index.js" />
+}
+
+<abp-card>
+    <abp-card-header>
+        <abp-row>
+            <abp-column size-md="_6">
+                <h2>@L["CategoryItems"]</h2>
+            </abp-column>
+            <abp-column size-md="_6" class="text-end">
+                @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.CategoryItems.Create))
+                {
+                    <abp-button id="NewCategoryItemButton"
+                               text="@L["NewCategoryItem"].Value"
+                               icon="plus"
+                               button-type="Primary" />
+                }
+            </abp-column>
+        </abp-row>
+    </abp-card-header>
+    <abp-card-body>
+        <abp-row class="mb-3">
+            <abp-column size-md="_3">
+                <abp-select asp-for="CategoryTypeId" 
+                           label="@L["CategoryType"]"
+                           asp-items="@Model.CategoryTypes"/>
+            </abp-column>
+            <abp-column size-md="_3">
+                <abp-select asp-for="ParentId" 
+                           label="@L["Parent"]"
+                           asp-items="@Model.Parents"/>
+            </abp-column>
+            <abp-column size-md="_3">
+                <abp-input asp-for="Filter" label="@L["Search"]"/>
+            </abp-column>
+            <abp-column size-md="_3">
+                <abp-select asp-for="IsActive" 
+                           label="@L["Status"]"
+                           asp-items="@Model.Statuses"/>
+            </abp-column>
+        </abp-row>
+        <abp-table striped-rows="true" id="CategoryItemsTable">
+            <thead>
+                <tr>
+                    <th>@L["Actions"]</th>
+                    <th>@L["CategoryType"]</th>
+                    <th>@L["Code"]</th>
+                    <th>@L["Name"]</th>
+                    <th>@L["Parent"]</th>
+                    <th>@L["DisplayOrder"]</th>
+                    <th>@L["IsActive"]</th>
+                    <th>@L["Value"]</th>
+                </tr>
+            </thead>
+        </abp-table>
+    </abp-card-body>
+</abp-card> 

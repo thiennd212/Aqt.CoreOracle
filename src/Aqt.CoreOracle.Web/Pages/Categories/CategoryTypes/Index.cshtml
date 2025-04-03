@@ -1,0 +1,53 @@
+@page
+@using Aqt.CoreOracle.Permissions
+@using Aqt.CoreOracle.Web.Pages.Categories.CategoryTypes
+@using Microsoft.AspNetCore.Authorization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@using Aqt.CoreOracle.Localization
+@using Microsoft.Extensions.Localization
+@model IndexModel
+@inject IStringLocalizer<CoreOracleResource> L
+@inject IAuthorizationService AuthorizationService
+@inject IPageLayout PageLayout
+@{
+    PageLayout.Content.Title = L["CategoryTypes"].Value;
+    PageLayout.Content.BreadCrumb.Add(L["Menu:Categories"].Value);
+    PageLayout.Content.MenuItemName = "Categories";
+}
+
+@section scripts {
+    <abp-script src="/Pages/Categories/CategoryTypes/index.js" />
+}
+
+<abp-card>
+    <abp-card-header>
+        <abp-row>
+            <abp-column size-md="_6">
+                <h2>@L["CategoryTypes"]</h2>
+            </abp-column>
+            <abp-column size-md="_6" class="text-end">
+                @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.CategoryTypes.Create))
+                {
+                    <abp-button id="NewCategoryTypeButton"
+                               text="@L["NewCategoryType"].Value"
+                               icon="plus"
+                               button-type="Primary" />
+                }
+            </abp-column>
+        </abp-row>
+    </abp-card-header>
+    <abp-card-body>
+        <abp-table striped-rows="true" id="CategoryTypesTable">
+            <thead>
+                <tr>
+                    <th>@L["Actions"]</th>
+                    <th>@L["Code"]</th>
+                    <th>@L["Name"]</th>
+                    <th>@L["Description"]</th>
+                    <th>@L["IsActive"]</th>
+                    <th>@L["AllowMultipleSelect"]</th>
+                </tr>
+            </thead>
+        </abp-table>
+    </abp-card-body>
+</abp-card> 

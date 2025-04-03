@@ -1,0 +1,158 @@
+@page
+@using Aqt.CoreOracle.Localization
+@using Microsoft.Extensions.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal
+@model Aqt.CoreOracle.Web.Pages.Categories.CategoryItems.CreateModalModel
+@inject IStringLocalizer<CoreOracleResource> L
+@{
+    Layout = null;
+}
+
+<form id="createCategoryItemForm" asp-page="/Categories/CategoryItems/CreateModal" data-ajax-begin="savingCategoryItem">
+    <abp-modal>
+        <abp-modal-header title="@L["NewCategoryItem"].Value"></abp-modal-header>
+        <abp-modal-body>
+            <abp-select asp-for="CategoryItem.CategoryTypeId"
+                       label="@L["CategoryType"]"
+                       asp-items="@Model.CategoryTypes"
+                       required />
+                       
+            <abp-input asp-for="CategoryItem.Code" 
+                      auto-focus="true"
+                      required
+                      maxlength="50" />
+                      
+            <abp-input asp-for="CategoryItem.Name" 
+                      required
+                      maxlength="100" />
+            
+            <abp-select asp-for="CategoryItem.ParentId"
+                       label="@L["Parent"]"
+                       asp-items="@Model.Parents" />
+                       
+            <abp-input asp-for="CategoryItem.DisplayOrder" type="number" min="0" />
+            <abp-input asp-for="CategoryItem.Value" maxlength="500" />
+            <abp-input asp-for="CategoryItem.Icon" maxlength="100" />
+            <abp-input asp-for="CategoryItem.ExtraProperties" text-area maxlength="2000" />
+            <abp-input asp-for="CategoryItem.IsActive" />
+        </abp-modal-body>
+        <abp-modal-footer buttons="@(AbpModalButtons.Cancel|AbpModalButtons.Save)"></abp-modal-footer>
+    </abp-modal>
+</form>
+
+@section scripts {
+    <script>
+        $(function() {
+            var $form = $('#createCategoryItemForm');
+            var $submitButton = $form.find('button[type="submit"]');
+            var $categoryTypeSelect = $('#CategoryItem_CategoryTypeId');
+            var $codeInput = $('#CategoryItem_Code');
+            
+            // Initialize form validation
+            $form.data('validator').settings.rules = {
+                'CategoryItem.CategoryTypeId': {
+                    required: true
+                },
+                'CategoryItem.Code': {
+                    required: true,
+                    maxlength: 50,
+                    remote: {
+                        url: "/Categories/CategoryItems/CheckCodeAvailability",
+                        type: "POST",
+                        data: {
+                            categoryTypeId: function() {
+                                return $categoryTypeSelect.val();
+                            },
+                            code: function() {
+                                return $codeInput.val();
+                            }
+                        }
+                    }
+                },
+                'CategoryItem.Name': {
+                    required: true,
+                    maxlength: 100
+                },
+                'CategoryItem.Value': {
+                    maxlength: 500
+                },
+                'CategoryItem.Icon': {
+                    maxlength: 100
+                },
+                'CategoryItem.ExtraProperties': {
+                    maxlength: 2000
+                }
+            };
+
+            $form.data('validator').settings.messages = {
+                'CategoryItem.CategoryTypeId': {
+                    required: '@L["RequiredField"]'
+                },
+                'CategoryItem.Code': {
+                    required: '@L["RequiredField"]',
+                    maxlength: '@L["MaxLengthField"]',
+                    remote: '@L["CategoryCodeAlreadyExists"]'
+                },
+                'CategoryItem.Name': {
+                    required: '@L["RequiredField"]',
+                    maxlength: '@L["MaxLengthField"]'
+                },
+                'CategoryItem.Value': {
+                    maxlength: '@L["MaxLengthField"]'
+                },
+                'CategoryItem.Icon': {
+                    maxlength: '@L["MaxLengthField"]'
+                },
+                'CategoryItem.ExtraProperties': {
+                    maxlength: '@L["MaxLengthField"]'
+                }
+            };
+
+            // Handle parent dropdown update
+            $categoryTypeSelect.on('change', function() {
+                var categoryTypeId = $(this).val();
+                if (!categoryTypeId) {
+                    $('#CategoryItem_ParentId').empty().append($('<option>', {
+                        value: '',
+                        text: '@L["None"]'
+                    }));
+                    return;
+                }
+
+                abp.ui.setBusy($form);
+                aqt.coreOracle.categories.categoryItem
+                    .getList({
+                        categoryTypeId: categoryTypeId,
+                        maxResultCount: 1000,
+                        isActive: true
+                    })
+                    .then(function(result) {
+                        var $parentSelect = $('#CategoryItem_ParentId');
+                        $parentSelect.empty();
+                        $parentSelect.append($('<option>', {
+                            value: '',
+                            text: '@L["None"]'
+                        }));
+                        result.items.forEach(function(item) {
+                            $parentSelect.append($('<option>', {
+                                value: item.id,
+                                text: item.name
+                            }));
+                        });
+                    })
+                    .finally(function() {
+                        abp.ui.clearBusy($form);
+                    });
+            });
+        });
+
+        // Show loading when saving
+        function savingCategoryItem() {
+            if (!$('#createCategoryItemForm').valid()) {
+                return false;
+            }
+            abp.ui.setBusy();
+            return true;
+        }
+    </script>
+} 

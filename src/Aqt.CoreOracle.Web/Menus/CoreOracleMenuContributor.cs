@@ -35,6 +35,35 @@ public class CoreOracleMenuContributor : IMenuContributor
             )
         );
 
+        //Categories
+        var categoriesMenu = new ApplicationMenuItem(
+            "Categories",
+            l["Menu:Categories"],
+            icon: "fa fa-list",
+            order: 2
+        );
+
+        categoriesMenu.AddItem(
+            new ApplicationMenuItem(
+                "CategoryTypes",
+                l["Menu:CategoryTypes"],
+                url: "/Categories/CategoryTypes",
+                icon: "fa fa-folder",
+                requiredPermissionName: CoreOraclePermissions.CategoryTypes.Default
+            )
+        );
+
+        categoriesMenu.AddItem(
+            new ApplicationMenuItem(
+                "CategoryItems",
+                l["Menu:CategoryItems"],
+                url: "/Categories/CategoryItems",
+                icon: "fa fa-list-alt",
+                requiredPermissionName: CoreOraclePermissions.CategoryItems.Default
+            )
+        );
+
+        context.Menu.AddItem(categoriesMenu);
 
         //Administration
         var administration = context.Menu.GetAdministration();
