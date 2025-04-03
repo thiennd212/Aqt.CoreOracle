@@ -17,7 +17,7 @@ public class CoreOracleDbContextFactory : IDesignTimeDbContextFactory<CoreOracle
         CoreOracleEfCoreEntityExtensionMappings.Configure();
 
         var builder = new DbContextOptionsBuilder<CoreOracleDbContext>()
-            .UseOracle(configuration.GetConnectionString("Default"), opt => opt.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion21));
+            .UseOracle(configuration.GetConnectionString("Default"), opt => opt.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion23));
         
         return new CoreOracleDbContext(builder.Options);
     }

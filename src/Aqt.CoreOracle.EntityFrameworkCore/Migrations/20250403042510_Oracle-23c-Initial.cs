@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Aqt.CoreOracle.Migrations
 {
     /// <inheritdoc />
-    public partial class Oracle_Initial : Migration
+    public partial class Oracle23cInitial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -56,7 +56,7 @@ namespace Aqt.CoreOracle.Migrations
                     CreationTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     NextTryTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     LastTryTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true),
-                    IsAbandoned = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    IsAbandoned = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     Priority = table.Column<byte>(type: "NUMBER(3)", nullable: false, defaultValue: (byte)15),
                     ExtraProperties = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "NVARCHAR2(40)", maxLength: 40, nullable: false)
@@ -87,8 +87,8 @@ namespace Aqt.CoreOracle.Migrations
                 {
                     Id = table.Column<Guid>(type: "RAW(16)", nullable: false),
                     Name = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
-                    Required = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    IsStatic = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    Required = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    IsStatic = table.Column<bool>(type: "BOOLEAN", nullable: false),
                     Regex = table.Column<string>(type: "NVARCHAR2(512)", maxLength: 512, nullable: true),
                     RegexDescription = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: true),
                     Description = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: true),
@@ -127,8 +127,8 @@ namespace Aqt.CoreOracle.Migrations
                     DisplayName = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
                     Description = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: true),
                     DefaultValue = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: true),
-                    IsVisibleToClients = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    IsAvailableToHost = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    IsVisibleToClients = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    IsAvailableToHost = table.Column<bool>(type: "BOOLEAN", nullable: false),
                     AllowedProviders = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: true),
                     ValueType = table.Column<string>(type: "NCLOB", maxLength: 2048, nullable: true),
                     ExtraProperties = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true)
@@ -184,7 +184,7 @@ namespace Aqt.CoreOracle.Migrations
                     CreatorId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     LastModificationTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true),
                     LastModifierId = table.Column<Guid>(type: "RAW(16)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    IsDeleted = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     DeleterId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     DeletionTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
                 },
@@ -236,7 +236,7 @@ namespace Aqt.CoreOracle.Migrations
                     Name = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false),
                     ParentName = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: true),
                     DisplayName = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
-                    IsEnabled = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    IsEnabled = table.Column<bool>(type: "BOOLEAN", nullable: false),
                     MultiTenancySide = table.Column<byte>(type: "NUMBER(3)", nullable: false),
                     Providers = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: true),
                     StateCheckers = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: true),
@@ -255,9 +255,9 @@ namespace Aqt.CoreOracle.Migrations
                     TenantId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     Name = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
                     NormalizedName = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
-                    IsDefault = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    IsStatic = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    IsPublic = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    IsDefault = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    IsStatic = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    IsPublic = table.Column<bool>(type: "BOOLEAN", nullable: false),
                     EntityVersion = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     CreationTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     ExtraProperties = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false),
@@ -323,10 +323,10 @@ namespace Aqt.CoreOracle.Migrations
                     DisplayName = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
                     Description = table.Column<string>(type: "NVARCHAR2(512)", maxLength: 512, nullable: true),
                     DefaultValue = table.Column<string>(type: "NVARCHAR2(2000)", maxLength: 2000, nullable: true),
-                    IsVisibleToClients = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    IsVisibleToClients = table.Column<bool>(type: "BOOLEAN", nullable: false),
                     Providers = table.Column<string>(type: "NVARCHAR2(1024)", maxLength: 1024, nullable: true),
-                    IsInherited = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    IsEncrypted = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    IsInherited = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    IsEncrypted = table.Column<bool>(type: "BOOLEAN", nullable: false),
                     ExtraProperties = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true)
                 },
                 constraints: table =>
@@ -363,7 +363,7 @@ namespace Aqt.CoreOracle.Migrations
                     CreatorId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     LastModificationTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true),
                     LastModifierId = table.Column<Guid>(type: "RAW(16)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    IsDeleted = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     DeleterId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     DeletionTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
                 },
@@ -400,18 +400,18 @@ namespace Aqt.CoreOracle.Migrations
                     Surname = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: true),
                     Email = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
                     NormalizedEmail = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
-                    EmailConfirmed = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    EmailConfirmed = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     PasswordHash = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: true),
                     SecurityStamp = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: false),
-                    IsExternal = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    IsExternal = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     PhoneNumber = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
-                    IsActive = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
+                    IsActive = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "TIMESTAMP(7) WITH TIME ZONE", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    LockoutEnabled = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     AccessFailedCount = table.Column<int>(type: "NUMBER(10)", nullable: false),
-                    ShouldChangePasswordOnNextLogin = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    ShouldChangePasswordOnNextLogin = table.Column<bool>(type: "BOOLEAN", nullable: false),
                     EntityVersion = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     LastPasswordChangeTime = table.Column<DateTimeOffset>(type: "TIMESTAMP(7) WITH TIME ZONE", nullable: true),
                     ExtraProperties = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false),
@@ -420,7 +420,7 @@ namespace Aqt.CoreOracle.Migrations
                     CreatorId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     LastModificationTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true),
                     LastModifierId = table.Column<Guid>(type: "RAW(16)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    IsDeleted = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     DeleterId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     DeletionTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
                 },
@@ -456,7 +456,7 @@ namespace Aqt.CoreOracle.Migrations
                     CreatorId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     LastModificationTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true),
                     LastModifierId = table.Column<Guid>(type: "RAW(16)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    IsDeleted = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     DeleterId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     DeletionTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
                 },
@@ -483,7 +483,7 @@ namespace Aqt.CoreOracle.Migrations
                     CreatorId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     LastModificationTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true),
                     LastModifierId = table.Column<Guid>(type: "RAW(16)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    IsDeleted = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
                     DeleterId = table.Column<Guid>(type: "RAW(16)", nullable: true),
                     DeletionTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
                 },

@@ -13,8 +13,8 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Aqt.CoreOracle.Migrations
 {
     [DbContext(typeof(CoreOracleDbContext))]
-    [Migration("20250402165456_Oracle_Clob_Conversion")]
-    partial class Oracle_Clob_Conversion
+    [Migration("20250403042510_Oracle-23c-Initial")]
+    partial class Oracle23cInitial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,8 +76,7 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnName("CorrelationId");
 
                     b.Property<string>("Exceptions")
-                        .HasMaxLength(4000)
-                        .HasColumnType("clob");
+                        .HasColumnType("NVARCHAR2(2000)");
 
                     b.Property<int>("ExecutionDuration")
                         .HasColumnType("NUMBER(10)")
@@ -178,8 +177,8 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnName("MethodName");
 
                     b.Property<string>("Parameters")
-                        .HasMaxLength(4000)
-                        .HasColumnType("clob")
+                        .HasMaxLength(2000)
+                        .HasColumnType("NVARCHAR2(2000)")
                         .HasColumnName("Parameters");
 
                     b.Property<string>("ServiceName")
@@ -315,7 +314,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("IsAbandoned")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false);
 
                     b.Property<string>("JobArgs")
@@ -461,10 +460,10 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnType("NVARCHAR2(128)");
 
                     b.Property<bool>("IsAvailableToHost")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<bool>("IsVisibleToClients")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -576,7 +575,7 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<bool>("IsStatic")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -592,7 +591,7 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnType("NVARCHAR2(128)");
 
                     b.Property<bool>("Required")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<int>("ValueType")
                         .HasColumnType("NUMBER(10)");
@@ -653,15 +652,15 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasColumnName("IsDefault");
 
                     b.Property<bool>("IsPublic")
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasColumnName("IsPublic");
 
                     b.Property<bool>("IsStatic")
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasColumnName("IsStatic");
 
                     b.Property<string>("Name")
@@ -884,7 +883,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("EmailConfirmed");
 
@@ -897,18 +896,18 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasColumnName("IsActive");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("IsDeleted");
 
                     b.Property<bool>("IsExternal")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("IsExternal");
 
@@ -925,7 +924,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("LockoutEnabled")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("LockoutEnabled");
 
@@ -961,7 +960,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("PhoneNumberConfirmed");
 
@@ -972,7 +971,7 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnName("SecurityStamp");
 
                     b.Property<bool>("ShouldChangePasswordOnNextLogin")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<string>("Surname")
                         .HasMaxLength(64)
@@ -985,7 +984,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("TwoFactorEnabled");
 
@@ -1212,7 +1211,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("IsDeleted");
 
@@ -1331,7 +1330,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("IsDeleted");
 
@@ -1471,7 +1470,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("IsDeleted");
 
@@ -1531,8 +1530,7 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<string>("Payload")
-                        .HasMaxLength(4000)
-                        .HasColumnType("clob");
+                        .HasColumnType("NVARCHAR2(2000)");
 
                     b.Property<string>("Properties")
                         .HasColumnType("NVARCHAR2(2000)");
@@ -1588,7 +1586,7 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnType("NVARCHAR2(128)");
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<byte>("MultiTenancySide")
                         .HasColumnType("NUMBER(3)");
@@ -1739,13 +1737,13 @@ namespace Aqt.CoreOracle.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<bool>("IsEncrypted")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<bool>("IsInherited")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<bool>("IsVisibleToClients")
-                        .HasColumnType("NUMBER(1)");
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1802,7 +1800,7 @@ namespace Aqt.CoreOracle.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
+                        .HasColumnType("BOOLEAN")
                         .HasDefaultValue(false)
                         .HasColumnName("IsDeleted");
 
