@@ -1,0 +1,255 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "This rule governs Serilog implementation in ABP applications. Apply when:
+(1) Configuring logging in ABP applications
+(2) Setting up Serilog providers
+(3) Implementing structured logging
+(4) Working with log levels
+(5) Creating centralized logging solutions
+(6) Troubleshooting application issues through logs
+(7) Implementing custom log enrichers"
+globs: ""
+alwaysApply: false
+---
+
+# Serilog Implementation Guidelines
+
+## Critical Rules
+- Configure Serilog in appsettings.json cho centralized management
+- Sử dụng structured logging với template cho contextual information
+- Implement proper log levels (Verbose, Debug, Information, Warning, Error, Fatal)
+- Sử dụng Serilog Enrichers để thêm context information
+- Implement proper log sinks (Console, File, Seq, Elasticsearch)
+- Sử dụng proper retention policies cho log files
+- Tránh logging sensitive information
+- Sử dụng ILogger<T> interface cho dependency injection
+- Implement proper exception logging
+- Sử dụng logging scopes cho related operations
+- Implement performance logging cho slow operations
+- Sử dụng Serilog.Extensions.Hosting for proper ASP.NET Core integration
+
+## Examples
+
+<example>
+```json
+// appsettings.json with proper Serilog configuration
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning",
+        "Microsoft.EntityFrameworkCore": "Warning"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "File",
+        "Args": {
+          "path": "Logs/log-.txt",
+          "rollingInterval": "Day",
+          "retainedFileCountLimit": 7,
+          "formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact"
+        }
+      },
+      {
+        "Name": "Seq",
+        "Args": {
+          "serverUrl": "http://localhost:5341"
+        }
+      },
+      {
+        "Name": "Console"
+      }
+    ],
+    "Enrich": [
+      "FromLogContext",
+      "WithMachineName",
+      "WithThreadId",
+      "WithEnvironmentName"
+    ],
+    "Properties": {
+      "Application": "BookStore"
+    }
+  }
+}
+```
+
+```csharp
+// Program.cs with Serilog configuration
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+
+        try
+        {
+            Log.Information("Starting BookStore web host");
+            CreateHostBuilder(args).Build().Run();
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
+
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .UseSerilog((context, services, configuration) => configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext()
+                .WriteTo.Console())
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });
+}
+
+// Service with proper structured logging
+public class BookAppService : ApplicationService, IBookAppService
+{
+    private readonly IRepository<Book, Guid> _bookRepository;
+    private readonly ILogger<BookAppService> _logger;
+
+    public BookAppService(
+        IRepository<Book, Guid> bookRepository,
+        ILogger<BookAppService> logger)
+    {
+        _bookRepository = bookRepository;
+        _logger = logger;
+    }
+
+    public async Task<BookDto> GetAsync(Guid id)
+    {
+        _logger.LogInformation("Retrieving book with ID: {BookId}", id);
+        
+        try
+        {
+            var book = await _bookRepository.GetAsync(id);
+            
+            if (book == null)
+            {
+                _logger.LogWarning("Book with ID {BookId} not found", id);
+                throw new EntityNotFoundException(typeof(Book), id);
+            }
+            
+            _logger.LogDebug("Book with ID {BookId} retrieved successfully. Name: {BookName}", id, book.Name);
+            
+            return ObjectMapper.Map<Book, BookDto>(book);
+        }
+        catch (Exception ex) when (ex is not EntityNotFoundException)
+        {
+            _logger.LogError(ex, "Error occurred while retrieving book with ID {BookId}", id);
+            throw;
+        }
+    }
+    
+    public async Task<BookDto> CreateAsync(CreateBookDto input)
+    {
+        using (_logger.BeginScope("Creating new book {BookName}", input.Name))
+        {
+            _logger.LogInformation("Creating new book");
+            
+            var book = await _bookManager.CreateAsync(input.Name, input.AuthorId, input.Price);
+            
+            _logger.LogInformation("Book created successfully with ID: {BookId}", book.Id);
+            
+            return ObjectMapper.Map<Book, BookDto>(book);
+        }
+    }
+}
+```
+</example>
+
+<example type="invalid">
+```json
+// Invalid appsettings.json without structured configuration
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information"
+    },
+    // Missing Serilog configuration
+    // Using default logging instead of Serilog
+  }
+}
+```
+
+```csharp
+// Invalid Program.cs without Serilog
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        CreateHostBuilder(args).Build().Run();
+        // Missing structured logging setup
+        // Missing exception handling
+    }
+
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            // Missing Serilog configuration
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });
+}
+
+// Invalid service with poor logging
+public class BadBookService
+{
+    private readonly IRepository<Book, Guid> _bookRepository;
+    // Missing ILogger
+    
+    public BadBookService(IRepository<Book, Guid> bookRepository)
+    {
+        _bookRepository = bookRepository;
+    }
+    
+    public async Task<BookDto> GetBook(Guid id)
+    {
+        // Missing logging
+        var book = await _bookRepository.GetAsync(id);
+        
+        if (book == null)
+        {
+            // Missing log for not found
+            throw new Exception("Book not found"); // Generic exception
+        }
+        
+        // Missing success logging
+        return ObjectMapper.Map<Book, BookDto>(book);
+    }
+    
+    public async Task<BookDto> CreateBook(CreateBookDto input)
+    {
+        // Using Console.WriteLine instead of structured logging
+        Console.WriteLine("Creating book: " + input.Name);
+        
+        var book = new Book(GuidGenerator.Create(), input.Name, input.AuthorId, input.Price);
+        await _bookRepository.InsertAsync(book);
+        
+        // Hard to parse log message
+        Console.WriteLine("Created book with id " + book.Id);
+        
+        return ObjectMapper.Map<Book, BookDto>(book);
+    }
+}
+```
+</example> 

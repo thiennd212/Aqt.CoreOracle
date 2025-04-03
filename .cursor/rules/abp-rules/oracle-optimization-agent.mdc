@@ -1,0 +1,186 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "This rule governs Oracle database optimization in ABP applications. Apply when:
+(1) Configuring Oracle database connections
+(2) Optimizing Oracle query performance
+(3) Implementing indexing strategies
+(4) Managing connection pooling
+(5) Working with large datasets in Oracle
+(6) Implementing query caching
+(7) Monitoring database performance"
+globs: ""
+alwaysApply: false
+---
+
+# Oracle Database Optimization Guidelines
+
+## Critical Rules
+- Configure proper connection pooling trong appsettings.json
+- Implementation indexing strategies cho các frequently queried columns
+- Sử dụng query hints cho complex queries
+- Implement query caching cho read-heavy operations
+- Tuân thủ Oracle naming conventions cho tables và columns
+- Sử dụng SQL parameters để tránh SQL injection
+- Implement paging cho large queries
+- Tránh N+1 query problem bằng cách sử dụng JOINs
+- Sử dụng Oracle stored procedures cho complex business logic
+- Regularly monitor và optimize slow queries
+- Sử dụng query plan caching
+- Configure proper timeout values
+
+## Examples
+
+<example>
+```json
+// appsettings.json với proper connection pooling
+{
+  "ConnectionStrings": {
+    "Default": "User Id=username;Password=password;Data Source=localhost:1521/XE;Pooling=true;Min Pool Size=5;Max Pool Size=100;Connection Timeout=60;Statement Cache Size=50"
+  }
+}
+```
+
+```csharp
+// EF Core Oracle configuration
+public class BookStoreDbContextFactory : IDesignTimeDbContextFactory<BookStoreDbContext>
+{
+    public BookStoreDbContext CreateDbContext(string[] args)
+    {
+        var builder = new DbContextOptionsBuilder<BookStoreDbContext>()
+            .UseOracle(GetConnectionString(), options =>
+            {
+                options.UseOracleSQLCompatibility("11");
+                options.CommandTimeout(30);
+                options.MaxBatchSize(100);
+                options.MigrationsHistoryTable("__EFMigrationsHistory");
+            });
+
+        return new BookStoreDbContext(builder.Options);
+    }
+    
+    private static string GetConnectionString()
+    {
+        return new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build()
+            .GetConnectionString("Default");
+    }
+}
+
+// Optimization cho large dataset query
+public async Task<List<BookDto>> GetPagedBooksAsync(int skipCount, int maxResultCount)
+{
+    var dbContext = await GetDbContextAsync();
+    
+    return await dbContext.Books
+        .AsNoTracking() // Performance optimization
+        .OrderBy(b => b.Name)
+        .Skip(skipCount)
+        .Take(maxResultCount)
+        .Select(b => new BookDto // Projection for performance
+        {
+            Id = b.Id,
+            Name = b.Name,
+            Price = b.Price,
+            AuthorName = b.Author.Name // Eager loading
+        })
+        .ToListAsync();
+}
+
+// Repository với proper indexing và query optimization
+public class BookStoreDbContextModelCreatingExtensions
+{
+    public static void ConfigureBookStore(this ModelBuilder builder)
+    {
+        builder.Entity<Book>(b =>
+        {
+            b.ToTable("APP_BOOKS"); // Oracle naming convention
+            
+            // Composite index for frequent queries
+            b.HasIndex(x => new { x.AuthorId, x.IsPublished });
+            
+            // Function-based index for case-insensitive searches
+            b.HasIndex("UPPER(NAME)").HasDatabaseName("IX_BOOKS_UPPER_NAME");
+            
+            // Text index for full-text search
+            b.HasIndex(x => x.Description).HasMethod("TEXT");
+        });
+    }
+}
+```
+</example>
+
+<example type="invalid">
+```json
+// Invalid connection string without pooling configuration
+{
+  "ConnectionStrings": {
+    "Default": "User Id=username;Password=password;Data Source=localhost:1521/XE"
+    // Missing pooling settings
+    // Missing timeout configuration
+  }
+}
+```
+
+```csharp
+// Invalid DbContext configuration
+public class BadDbContextFactory
+{
+    public BookStoreDbContext CreateDbContext()
+    {
+        // Hard-coded connection string
+        var connectionString = "User Id=username;Password=password;Data Source=localhost:1521/XE";
+        
+        var builder = new DbContextOptionsBuilder<BookStoreDbContext>()
+            .UseOracle(connectionString);
+            // Missing Oracle compatibility version
+            // Missing command timeout
+            // Missing batch size configuration
+        
+        return new BookStoreDbContext(builder.Options);
+    }
+}
+
+// Inefficient query without optimization
+public List<BookDto> GetPagedBooks(int page, int pageSize)
+{
+    // Using synchronous method
+    var books = _dbContext.Books
+        .Include(b => b.Author) // Loading entire entity when not needed
+        .Include(b => b.Categories) // Loading unnecessary data
+        .Include(b => b.Publisher)
+        .ToList() // Loading all data to memory first
+        .Skip((page - 1) * pageSize) // Applying paging in memory
+        .Take(pageSize)
+        .Select(b => new BookDto
+        {
+            Id = b.Id,
+            Name = b.Name
+        })
+        .ToList();
+    
+    return books;
+}
+
+// Missing proper indexing
+public class BadModelCreatingExtensions
+{
+    public static void ConfigureBadBookStore(this ModelBuilder builder)
+    {
+        builder.Entity<Book>(b =>
+        {
+            // Non-standard Oracle table name
+            b.ToTable("Books");
+            
+            // Missing indexes for frequently queried columns
+            // Missing composite indexes
+        });
+    }
+}
+```
+</example> 

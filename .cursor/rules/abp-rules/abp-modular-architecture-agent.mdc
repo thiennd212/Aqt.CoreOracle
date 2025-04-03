@@ -1,0 +1,268 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "This rule governs ABP Framework's modular architecture implementation. Apply when: 
+(1) Creating new modules
+(2) Modifying existing module structure
+(3) Implementing cross-module communication
+(4) Setting up new ABP projects
+(5) Refactoring existing modules
+(6) Working with domain services and entities
+(7) Implementing shared kernel
+(8) Setting up event-driven communication
+(9) Configuring module options
+(10) Implementing dynamic API controllers"
+globs: ""
+alwaysApply: false
+---
+
+# ABP Modular Architecture Guidelines
+
+```mermaid
+graph TD
+    A[Domain Layer] --> B[Application Layer]
+    B --> C[HTTP API Layer]
+    C --> D[UI Layer]
+    E[Shared Kernel] --> A
+    E --> B
+    F[Infrastructure] --> A
+    G[Events] --> |Domain Events| A
+    G --> |Integration Events| B
+```
+
+## Critical Rules
+- Mỗi module phải có ModuleNameModule.cs kế thừa AbpModule
+- Implement ConfigureServices cho module configuration
+- Sử dụng DependsOn attribute cho module dependencies
+- Tách business logic thành các services riêng biệt trong Application layer
+- Implement các interfaces từ Volo.Abp.* packages
+- Tuân thủ cấu trúc layer: Domain, Application, Infrastructure, HttpApi, HttpApi.Client
+- Domain layer chỉ chứa entities, value objects, domain services và repository interfaces
+- Application layer chứa application services và DTOs
+- Sử dụng IRepository<TEntity, TKey> cho repository interfaces
+- Sử dụng virtual keyword cho tất cả public properties của entities
+- Implement IMultiTenant interface cho entities hỗ trợ multi-tenancy
+- Sử dụng Data Transfer Objects (DTOs) cho tất cả public APIs
+- Implement shared kernel cho code sharing giữa modules
+- Sử dụng domain events cho intra-module communication
+- Sử dụng integration events cho inter-module communication
+- Configure module options thông qua IConfigureOptions
+- Implement dynamic API controllers với conventions
+- Sử dụng IDistributedEventBus cho distributed events
+- Implement proper module permissions và authorization
+- Sử dụng ISettingProvider cho module settings
+
+## Examples
+
+<example>
+```csharp
+// Shared Kernel Implementation
+public class SharedKernelModule : AbpModule
+{
+    public override void ConfigureServices(ServiceConfigurationContext context)
+    {
+        // Configure shared services
+        context.Services.AddTransient<IEmailSender, EmailSender>();
+        
+        // Configure shared options
+        context.Services.Configure<EmailOptions>(options =>
+        {
+            options.DefaultFromAddress = "noreply@example.com";
+        });
+    }
+}
+
+// Module với Event-Driven Communication
+public class BookStoreModule : AbpModule
+{
+    public override void ConfigureServices(ServiceConfigurationContext context)
+    {
+        // Configure module
+        Configure<AbpAutoMapperOptions>(options =>
+        {
+            options.AddMaps<BookStoreModule>();
+        });
+
+        // Configure distributed event bus
+        Configure<AbpDistributedEventBusOptions>(options =>
+        {
+            options.Handlers.Add<BookCreatedEventHandler>();
+        });
+    }
+}
+
+// Domain Events
+public class Book : FullAuditedAggregateRoot<Guid>, IMultiTenant
+{
+    public virtual string Name { get; protected set; }
+    public virtual Guid AuthorId { get; set; }
+    public virtual Guid? TenantId { get; set; }
+
+    protected Book() { }
+
+    internal Book(
+        Guid id,
+        string name,
+        Guid authorId,
+        Guid? tenantId = null)
+        : base(id)
+    {
+        SetName(name);
+        AuthorId = authorId;
+        TenantId = tenantId;
+        
+        // Add domain event
+        AddLocalEvent(new BookCreatedEto
+        {
+            Id = id,
+            Name = name,
+            AuthorId = authorId
+        });
+    }
+}
+
+// Event Handler
+public class BookCreatedEventHandler : IDistributedEventHandler<BookCreatedEto>
+{
+    private readonly ILogger<BookCreatedEventHandler> _logger;
+    private readonly IEmailSender _emailSender;
+
+    public BookCreatedEventHandler(
+        ILogger<BookCreatedEventHandler> logger,
+        IEmailSender emailSender)
+    {
+        _logger = logger;
+        _emailSender = emailSender;
+    }
+
+    public async Task HandleEventAsync(BookCreatedEto eventData)
+    {
+        _logger.LogInformation("New book created: {BookName}", eventData.Name);
+        
+        await _emailSender.SendAsync(
+            "admin@example.com",
+            "New Book Created",
+            $"A new book '{eventData.Name}' has been created."
+        );
+    }
+}
+
+// Module Configuration
+public class BookStoreOptions
+{
+    public string ApiUrl { get; set; }
+    public int MaxBooksPerAuthor { get; set; }
+}
+
+public class BookStoreOptionsConfigurator : IConfigureOptions<BookStoreOptions>
+{
+    private readonly IConfiguration _configuration;
+
+    public BookStoreOptionsConfigurator(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+    public void Configure(BookStoreOptions options)
+    {
+        options.ApiUrl = _configuration["BookStore:ApiUrl"];
+        options.MaxBooksPerAuthor = _configuration.GetValue<int>("BookStore:MaxBooksPerAuthor");
+    }
+}
+
+// Dynamic API Controllers
+[Area("bookStore")]
+[RemoteService(Name = "BookStore")]
+[Route("api/bookStore/books")]
+public class BookController : AbpController, IBookAppService
+{
+    private readonly IBookAppService _bookAppService;
+    private readonly IOptions<BookStoreOptions> _options;
+
+    public BookController(
+        IBookAppService bookAppService,
+        IOptions<BookStoreOptions> options)
+    {
+        _bookAppService = bookAppService;
+        _options = options;
+    }
+
+    [HttpGet]
+    public async Task<ListResultDto<BookDto>> GetListAsync()
+    {
+        return await _bookAppService.GetListAsync();
+    }
+}
+```
+</example>
+
+<example type="invalid">
+```csharp
+// Invalid module without proper structure
+public class InvalidModule : AbpModule 
+{
+    // Missing ConfigureServices
+    // Missing module dependencies
+    // Missing event handlers configuration
+}
+
+// Invalid shared code implementation
+public static class SharedHelper 
+{
+    // Static helper instead of proper shared kernel
+    public static string FormatEmail(string email)
+    {
+        return email.ToLower();
+    }
+}
+
+// Invalid event handling
+public class BadBookService
+{
+    // Direct service call instead of events
+    private readonly IEmailSender _emailSender;
+    
+    public async Task CreateBook(string name)
+    {
+        var book = new Book(Guid.NewGuid(), name);
+        
+        // Direct service call
+        await _emailSender.SendAsync(
+            "admin@example.com",
+            "New Book",
+            $"Book {name} created"
+        );
+    }
+}
+
+// Invalid module configuration
+public class BadBookStore
+{
+    // Hard-coded configuration
+    private const string ApiUrl = "http://localhost:5000";
+    
+    // Missing options pattern
+    public void DoSomething()
+    {
+        // Hard-coded values
+        var maxBooks = 10;
+    }
+}
+
+// Invalid API controller
+public class BadBookController : ControllerBase
+{
+    // Not using ABP conventions
+    // Missing proper routing
+    [HttpGet]
+    public IActionResult GetBooks()
+    {
+        // Direct implementation without service
+        return Ok(new List<Book>());
+    }
+}
+```
+</example> 
