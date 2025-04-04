@@ -17,7 +17,6 @@ public class CategoryType : FullAuditedAggregateRoot<Guid>
     public virtual string Name { get; set; }
 
     [StringLength(500)]
-    [AllowNull]
     public virtual string Description { get; set; }
 
     public virtual bool IsActive { get; set; }

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -17,6 +17,9 @@ using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Volo.Abp.AuditLogging;
 using Volo.Abp.OpenIddict.Tokens;
 using Aqt.CoreOracle.Categories;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection.Emit;
+using System.Linq;
 
 namespace Aqt.CoreOracle.EntityFrameworkCore;
 
@@ -72,6 +75,23 @@ public class CoreOracleDbContext :
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        //Set nullable cho các trường string mặc định True nếu không set isRequired
+        foreach (var entityType in builder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                // Chỉ áp dụng cho string
+                if (property.ClrType == typeof(string))
+                {
+                    var isRequired = property.PropertyInfo?.GetCustomAttributes(typeof(RequiredAttribute), true).Any() == true;
+                    if (!isRequired)
+                    {
+                        property.IsNullable = true;
+                    }
+                }
+            }
+        }
 
         /* Include modules to your migration db context */
 
