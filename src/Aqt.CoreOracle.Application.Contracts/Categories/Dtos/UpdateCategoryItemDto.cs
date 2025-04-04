@@ -3,10 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Aqt.CoreOracle.Categories.Dtos;
 
-public class CreateUpdateCategoryItemDto
+public class UpdateCategoryItemDto
 {
-    public Guid Id { get; set; }
-
     [Required]
     public Guid CategoryTypeId { get; set; }
 

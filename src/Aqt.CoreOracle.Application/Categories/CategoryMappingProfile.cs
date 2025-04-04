@@ -1,3 +1,4 @@
+using System;
 using AutoMapper;
 using Aqt.CoreOracle.Categories.Dtos;
 
@@ -10,7 +11,16 @@ public class CategoryMappingProfile : Profile
         CreateMap<CategoryType, CategoryTypeDto>();
         CreateMap<CreateUpdateCategoryTypeDto, CategoryType>();
 
-        CreateMap<CategoryItem, CategoryItemDto>();
-        CreateMap<CreateUpdateCategoryItemDto, CategoryItem>();
+        CreateMap<CategoryItem, CategoryItemDto>()
+            .ForMember(x => x.CategoryType, opt => opt.ExplicitExpansion())
+            .ForMember(x => x.Parent, opt => opt.ExplicitExpansion());
+
+        CreateMap<CategoryItem, CategoryItemLookupDto>()
+            .ForMember(x => x.CategoryTypeCode, opt => opt.MapFrom(src => src.CategoryType.Code))
+            .ForMember(x => x.CategoryTypeName, opt => opt.MapFrom(src => src.CategoryType.Name));
+
+        CreateMap<CreateCategoryItemDto, CategoryItem>();
+        CreateMap<UpdateCategoryItemDto, CategoryItem>();
+        CreateMap<CategoryItemDto, UpdateCategoryItemDto>();
     }
 } 

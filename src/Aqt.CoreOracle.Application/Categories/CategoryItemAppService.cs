@@ -10,6 +10,8 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.ObjectMapping;
 using Volo.Abp.Domain.Entities;
+using Volo.Abp.Application.Services;
+using Volo.Abp.Guids;
 
 namespace Aqt.CoreOracle.Categories;
 
@@ -91,19 +93,12 @@ public class CategoryItemAppService : CoreOracleAppService, ICategoryItemAppServ
     /// - The Parent CategoryItem does not exist or is of a different type
     /// </exception>
     [Authorize(CoreOraclePermissions.CategoryItems.Create)]
-    public async Task<CategoryItemDto> CreateAsync(CreateUpdateCategoryItemDto input)
+    public async Task<CategoryItemDto> CreateAsync(CreateCategoryItemDto input)
     {
         await ValidateCodeUniquenessAsync(input.CategoryTypeId, input.Code);
 
-        var categoryItem = new CategoryItem(
-            GuidGenerator.Create(),
-            input.CategoryTypeId,
-            input.Code,
-            input.Name,
-            description: input.Description,
-            isActive: input.IsActive
-        );
-
+        input.Id = GuidGenerator.Create();
+        var categoryItem = ObjectMapper.Map<CreateCategoryItemDto, CategoryItem>(input);
         await _categoryItemRepository.InsertAsync(categoryItem);
 
         return ObjectMapper.Map<CategoryItem, CategoryItemDto>(categoryItem);
@@ -123,7 +118,7 @@ public class CategoryItemAppService : CoreOracleAppService, ICategoryItemAppServ
     /// - Attempting to change the CategoryType
     /// </exception>
     [Authorize(CoreOraclePermissions.CategoryItems.Edit)]
-    public async Task<CategoryItemDto> UpdateAsync(Guid id, CreateUpdateCategoryItemDto input)
+    public async Task<CategoryItemDto> UpdateAsync(Guid id, UpdateCategoryItemDto input)
     {
         var categoryItem = await _categoryItemRepository.GetAsync(id);
 
@@ -132,12 +127,7 @@ public class CategoryItemAppService : CoreOracleAppService, ICategoryItemAppServ
             await ValidateCodeUniquenessAsync(input.CategoryTypeId, input.Code);
         }
 
-        categoryItem.CategoryTypeId = input.CategoryTypeId;
-        categoryItem.Code = input.Code;
-        categoryItem.Name = input.Name;
-        categoryItem.Description = input.Description;
-        categoryItem.IsActive = input.IsActive;
-
+        ObjectMapper.Map(input, categoryItem);
         await _categoryItemRepository.UpdateAsync(categoryItem);
 
         return ObjectMapper.Map<CategoryItem, CategoryItemDto>(categoryItem);

@@ -9,17 +9,17 @@ public class CategoryTypeConfiguration : IEntityTypeConfiguration<CategoryType>
 {
     public void Configure(EntityTypeBuilder<CategoryType> builder)
     {
-        builder.ToTable(CoreOracleConsts.DbTablePrefix + "CategoryTypes", CoreOracleConsts.DbSchema);
+        builder.ToTable(CoreOracleConsts.DbTablePrefix + "CategoryTypes");
         
         builder.ConfigureByConvention();
 
         builder.Property(x => x.Code)
-            .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(50)
+            .IsRequired();
 
         builder.Property(x => x.Name)
-            .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(100)
+            .IsRequired();
 
         builder.Property(x => x.Description)
             .HasMaxLength(500);

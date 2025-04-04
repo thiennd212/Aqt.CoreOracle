@@ -53,7 +53,19 @@ param(
     [string[]]$NavigationProperties,
     
     [Parameter(Mandatory = $false)]
-    [hashtable]$SeedData
+    [hashtable]$SeedData,
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$EnableCaching,
+    
+    [Parameter(Mandatory = $false)]
+    [int]$CacheTimeout = 30,
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$EnableLazyLoading,
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$EnableBatchProcessing
 )
 
 # Biến global để lưu trữ các file đã backup và thay đổi
@@ -620,6 +632,86 @@ The $entityName management UI is located at \`/$moduleName/${entityName}s\`.
     }
 }
 
+function Generate-CachingLayer {
+    param(
+        [string]$entityName,
+        [string]$moduleName,
+        [int]$cacheTimeout
+    )
+    
+    if (-not $EnableCaching) {
+        return
+    }
+    
+    try {
+        # Generate cache item
+        Copy-AndReplaceTemplate "$templateRoot/caching/cache-item-template.cs" "$projectRoot.Domain/$moduleName/${entityName}CacheItem.cs"
+        
+        # Generate cache service
+        Copy-AndReplaceTemplate "$templateRoot/caching/cache-service-template.cs" "$projectRoot.Application/$moduleName/${entityName}CacheService.cs"
+        
+        # Update cache timeout in templates
+        $content = Get-Content "$projectRoot.Application/$moduleName/${entityName}CacheService.cs" -Raw
+        $content = $content.Replace("AddMinutes(30)", "AddMinutes($cacheTimeout)")
+        Set-Content "$projectRoot.Application/$moduleName/${entityName}CacheService.cs" $content
+        
+        Write-Host "Generated caching layer for $entityName" -ForegroundColor Green
+    }
+    catch {
+        Write-Error "Failed to generate caching layer: $_"
+        throw
+    }
+}
+
+function Update-EntityForPerformance {
+    param(
+        [string]$entityPath
+    )
+    
+    if (-not ($EnableLazyLoading -or $EnableBatchProcessing)) {
+        return
+    }
+    
+    try {
+        $content = Get-Content $entityPath -Raw
+        
+        if ($EnableLazyLoading) {
+            # Add virtual keyword to navigation properties
+            $content = $content -replace "public ([^v]\w+\s+\w+\s*{)", "public virtual `$1"
+        }
+        
+        if ($EnableBatchProcessing) {
+            # Add batch processing support
+            $batchMethods = @"
+        public static IEnumerable<[EntityName]> CreateMany(IEnumerable<Create[EntityName]Dto> inputs)
+        {
+            return inputs.Select(input => new [EntityName](
+                GuidGenerator.Create(),
+                input.Code,
+                input.Name
+            ));
+        }
+
+        public void UpdateFromBatch(Update[EntityName]Dto input)
+        {
+            SetCode(input.Code);
+            SetName(input.Name);
+            // Add other properties
+        }
+"@
+            $insertPoint = $content.LastIndexOf("}")
+            $content = $content.Insert($insertPoint - 1, $batchMethods)
+        }
+        
+        Set-Content $entityPath $content
+        Write-Host "Updated entity for performance optimizations" -ForegroundColor Green
+    }
+    catch {
+        Write-Error "Failed to update entity for performance: $_"
+        throw
+    }
+}
+
 try {
     # Validate input
     if (-not (Test-ValidIdentifier $ModuleName)) {
@@ -675,6 +767,9 @@ try {
     Copy-AndReplaceTemplate "$templateRoot/domain/entity-template.cs" "$projectRoot.Domain/$ModuleName/$EntityName.cs"
     Copy-AndReplaceTemplate "$templateRoot/domain/repository-interface-template.cs" "$projectRoot.Domain/$ModuleName/I${EntityName}Repository.cs"
 
+    # Update entity for performance if needed
+    Update-EntityForPerformance "$projectRoot.Domain/$ModuleName/$EntityName.cs"
+
     # Generate Infrastructure Layer
     Copy-AndReplaceTemplate "$templateRoot/infrastructure/repository-template.cs" "$projectRoot.EntityFrameworkCore/$ModuleName/EfCore${EntityName}Repository.cs"
 
@@ -684,6 +779,9 @@ try {
     Copy-AndReplaceTemplate "$templateRoot/application/app-service-template.cs" "$projectRoot.Application/$ModuleName/${EntityName}AppService.cs"
     Copy-AndReplaceTemplate "$templateRoot/application/auto-mapper-profile-template.cs" "$projectRoot.Application/$ModuleName/${EntityName}AutoMapperProfile.cs"
     Copy-AndReplaceTemplate "$templateRoot/application/permissions-template.cs" "$projectRoot.Application.Contracts/$ModuleName/${ModuleName}Permissions.cs"
+
+    # Generate Caching Layer if enabled
+    Generate-CachingLayer -entityName $EntityName -moduleName $ModuleName -cacheTimeout $CacheTimeout
 
     # Generate Presentation Layer
     Copy-AndReplaceTemplate "$templateRoot/presentation/index-page-template.cshtml" "$projectRoot.Web/Pages/$ModuleName/${EntityName}s/Index.cshtml"
@@ -801,6 +899,17 @@ try {
         Write-Host "8. Run Add-Migration and Update-Database"
     } else {
         Write-Host "8. Run Update-Database"
+    }
+    if ($EnableCaching) {
+        Write-Host "- Configure distributed cache provider in appsettings.json"
+        Write-Host "- Review cache timeout settings"
+    }
+    if ($EnableLazyLoading) {
+        Write-Host "- Configure lazy loading in DbContext"
+    }
+    if ($EnableBatchProcessing) {
+        Write-Host "- Review batch processing methods"
+        Write-Host "- Add batch endpoints if needed"
     }
     Write-Host "9. Test the new feature"
 

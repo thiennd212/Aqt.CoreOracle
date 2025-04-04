@@ -13,8 +13,8 @@ public interface ICategoryItemAppService : IApplicationService
     Task<CategoryItemDto> GetByCodeAsync(Guid categoryTypeId, string code);
     Task<PagedResultDto<CategoryItemDto>> GetListAsync(CategoryItemGetListInput input);
     Task<List<CategoryItemDto>> GetListByTypeCodeAsync(string categoryTypeCode);
-    Task<CategoryItemDto> CreateAsync(CreateUpdateCategoryItemDto input);
-    Task<CategoryItemDto> UpdateAsync(Guid id, CreateUpdateCategoryItemDto input);
+    Task<CategoryItemDto> CreateAsync(CreateCategoryItemDto input);
+    Task<CategoryItemDto> UpdateAsync(Guid id, UpdateCategoryItemDto input);
     Task DeleteAsync(Guid id);
     Task<bool> IsCodeExistAsync(Guid categoryTypeId, string code, Guid? expectedId = null);
 } 

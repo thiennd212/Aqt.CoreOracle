@@ -1,17 +1,30 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Aqt.CoreOracle.Categories;
 
 public class CategoryType : FullAuditedAggregateRoot<Guid>
 {
-    public string Code { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public bool IsActive { get; set; }
-    public bool AllowMultipleSelect { get; set; }
-    public bool IsSystem { get; set; }
+    [Required]
+    [StringLength(50)]
+    public virtual string Code { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    public virtual string Name { get; set; }
+
+    [StringLength(500)]
+    [AllowNull]
+    public virtual string Description { get; set; }
+
+    public virtual bool IsActive { get; set; }
+
+    public virtual bool AllowMultipleSelect { get; set; }
+
+    public virtual bool IsSystem { get; set; }
     
     public virtual ICollection<CategoryItem> Items { get; set; }
     
@@ -45,21 +58,11 @@ public class CategoryType : FullAuditedAggregateRoot<Guid>
 
     public void SetName(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException($"{nameof(name)} cannot be null, empty or white space!", nameof(name));
-        }
-
         Name = name;
     }
 
     public void SetCode(string code)
     {
-        if (string.IsNullOrWhiteSpace(code))
-        {
-            throw new ArgumentException($"{nameof(code)} cannot be null, empty or white space!", nameof(code));
-        }
-
         Code = code;
     }
 } 

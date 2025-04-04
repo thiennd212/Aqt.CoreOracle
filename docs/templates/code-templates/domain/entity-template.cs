@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp;
 
@@ -13,27 +14,32 @@ namespace Aqt.CoreOracle.[ModuleName]
         /// <summary>
         /// Mã định danh
         /// </summary>
-        public string Code { get; private set; }
+        [Required]
+        [StringLength([EntityName]Constants.MaxCodeLength)]
+        public virtual string Code { get; protected set; }
 
         /// <summary>
         /// Tên
         /// </summary>
-        public string Name { get; private set; }
+        [Required]
+        [StringLength([EntityName]Constants.MaxNameLength)]
+        public virtual string Name { get; protected set; }
 
         /// <summary>
         /// Thứ tự hiển thị
         /// </summary>
-        public int DisplayOrder { get; set; }
+        public virtual int? DisplayOrder { get; set; }
 
         /// <summary>
         /// Trạng thái hoạt động
         /// </summary>
-        public bool IsActive { get; set; }
+        public virtual bool IsActive { get; set; }
 
         /// <summary>
         /// Thuộc tính mở rộng
         /// </summary>
-        public string ExtraProperties { get; set; }
+        [StringLength([EntityName]Constants.MaxExtraPropertiesLength)]
+        public virtual string ExtraProperties { get; set; }
         #endregion
 
         #region Constructors
@@ -43,7 +49,7 @@ namespace Aqt.CoreOracle.[ModuleName]
             Guid id,
             string code,
             string name,
-            int displayOrder = 0,
+            int? displayOrder = null,
             bool isActive = true
         ) : base(id)
         {
@@ -57,25 +63,29 @@ namespace Aqt.CoreOracle.[ModuleName]
         #region Methods
         internal void SetCode(string code)
         {
-            Code = Check.NotNullOrWhiteSpace(
-                code,
-                nameof(code),
-                maxLength: [EntityName]Constants.MaxCodeLength
-            );
+            if (code?.Length > [EntityName]Constants.MaxCodeLength)
+            {
+                throw new BusinessException(CoreOracleDomainErrorCodes.CodeTooLong)
+                    .WithData("MaxLength", [EntityName]Constants.MaxCodeLength);
+            }
+
+            Code = code;
         }
 
         internal void SetName(string name)
         {
-            Name = Check.NotNullOrWhiteSpace(
-                name,
-                nameof(name),
-                maxLength: [EntityName]Constants.MaxNameLength
-            );
+            if (name?.Length > [EntityName]Constants.MaxNameLength)
+            {
+                throw new BusinessException(CoreOracleDomainErrorCodes.NameTooLong)
+                    .WithData("MaxLength", [EntityName]Constants.MaxNameLength);
+            }
+
+            Name = name;
         }
 
-        internal void SetDisplayOrder(int displayOrder)
+        internal void SetDisplayOrder(int? displayOrder)
         {
-            if (displayOrder < 0)
+            if (displayOrder.HasValue && displayOrder.Value < 0)
             {
                 throw new BusinessException(CoreOracleDomainErrorCodes.InvalidDisplayOrder);
             }
@@ -85,10 +95,10 @@ namespace Aqt.CoreOracle.[ModuleName]
 
         internal void SetExtraProperties(string extraProperties)
         {
-            if (!string.IsNullOrEmpty(extraProperties) 
-                && extraProperties.Length > [EntityName]Constants.MaxExtraPropertiesLength)
+            if (extraProperties?.Length > [EntityName]Constants.MaxExtraPropertiesLength)
             {
-                throw new BusinessException(CoreOracleDomainErrorCodes.ExtraPropertiesTooLong);
+                throw new BusinessException(CoreOracleDomainErrorCodes.ExtraPropertiesTooLong)
+                    .WithData("MaxLength", [EntityName]Constants.MaxExtraPropertiesLength);
             }
 
             ExtraProperties = extraProperties;

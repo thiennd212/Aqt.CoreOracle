@@ -1,7 +1,7 @@
 # Hướng dẫn triển khai tính năng mới
 
 ## Giới thiệu
-Document này cung cấp hướng dẫn chi tiết về cách sử dụng template để triển khai các tính năng mới trong dự án CoreOracle.
+Document này cung cấp hướng dẫn chi tiết về cách sử dụng template và script Generate-Feature.ps1 để triển khai các tính năng mới trong dự án CoreOracle.
 
 ## Cấu trúc thư mục template
 ```
@@ -11,66 +11,204 @@ docs/templates/
 │   ├── domain/                        # Domain layer templates
 │   ├── application/                   # Application layer templates
 │   ├── infrastructure/                # Infrastructure layer templates
+│   ├── caching/                       # Caching layer templates
 │   └── presentation/                  # Presentation layer templates
 └── checklists/                        # Các checklist
 ```
 
-## Quy trình sử dụng template
+## Sử dụng Generate-Feature.ps1
 
-### 1. Khởi tạo tính năng mới
-1. Tạo branch mới từ develop:
+### 1. Cú pháp cơ bản
+```powershell
+.\Generate-Feature.ps1 -ModuleName "Categories" -EntityName "CategoryItem"
+```
+
+### 2. Các tham số bổ sung
+```powershell
+-Description "Mô tả về tính năng"
+-Force              # Ghi đè files đã tồn tại
+-UpdateDbContext    # Cập nhật DbContext
+-UpdateMenu         # Cập nhật Menu
+-UpdateAutoMapper   # Cập nhật AutoMapper
+-CreateMigration    # Tạo migration
+-UpdatePermissions  # Cập nhật permissions
+-UpdateDocs         # Cập nhật documentation
+```
+
+### 3. Tham số cho Caching và Performance
+```powershell
+-EnableCaching              # Tạo cache layer
+-CacheTimeout 30           # Thời gian cache (phút)
+-EnableLazyLoading         # Bật lazy loading
+-EnableBatchProcessing     # Hỗ trợ xử lý hàng loạt
+```
+
+## Quy trình triển khai
+
+### 1. Khởi tạo tính năng
+1. Tạo branch mới:
 ```bash
 git checkout -b feature/[feature-name]
 ```
 
-2. Copy template cần thiết từ thư mục templates
-3. Tạo thư mục cho tính năng mới theo cấu trúc chuẩn
+2. Generate code cơ bản:
+```powershell
+.\Generate-Feature.ps1 -ModuleName [Module] -EntityName [Entity] -Description [Description]
+```
 
-### 2. Checklist trước khi bắt đầu
-- [ ] Đã phân tích yêu cầu đầy đủ
-- [ ] Đã thiết kế database schema
-- [ ] Đã xác định các business rules
-- [ ] Đã xác định các permissions cần thiết
-- [ ] Đã lập kế hoạch testing
+3. Review và customize code được generate
 
-### 3. Các bước triển khai
+### 2. Implement Business Logic
 
 #### A. Domain Layer
 1. Entity
-   - Copy template từ `templates/code-templates/domain/entity-template.cs`
-   - Thay thế các placeholder với thông tin thực tế
-   - Implement các business rules
+   - Thêm properties
+   - Implement domain logic
+   - Thêm validation rules
 
-2. Repository Interface
-   - Copy template từ `templates/code-templates/domain/repository-interface-template.cs`
-   - Thêm các custom methods cần thiết
+2. Domain Service
+   - Implement business rules
+   - Xử lý validation phức tạp
+   - Implement domain events
 
 #### B. Application Layer
 1. DTOs
-   - Copy templates từ `templates/code-templates/application/dto-templates/`
    - Customize theo yêu cầu
+   - Thêm validation attributes
+   - Implement custom mapping
 
 2. Application Service
-   - Copy template interface và implementation
-   - Implement business logic
+   - Implement CRUD operations
+   - Thêm business logic
+   - Implement caching
+   - Xử lý authorization
 
 #### C. Infrastructure Layer
-1. Repository Implementation
-   - Copy template từ `templates/code-templates/infrastructure/`
-   - Implement các custom queries
+1. Repository
+   - Implement custom queries
+   - Optimize performance
+   - Implement caching strategy
 
-#### D. Presentation Layer
-1. Razor Pages
-   - Copy templates từ `templates/code-templates/presentation/`
-   - Customize UI theo yêu cầu
+2. Database
+   - Tạo indexes
+   - Implement partitioning nếu cần
+   - Optimize query performance
 
-### 4. Checklist kiểm tra chất lượng
-- [ ] Code tuân thủ coding standards
-- [ ] Đã implement đầy đủ unit tests
-- [ ] Đã implement đầy đủ integration tests
-- [ ] Performance đạt yêu cầu
-- [ ] Security đã được đảm bảo
-- [ ] Documentation đầy đủ
+### 3. Implement Caching
+
+```csharp
+public class [Entity]Cache : ITransientDependency
+{
+    private readonly IDistributedCache<[Entity]CacheItem> _cache;
+    
+    public async Task<[Entity]CacheItem> GetAsync(Guid id)
+    {
+        return await _cache.GetOrAddAsync(
+            id.ToString(),
+            async () => await GetFromDatabaseAsync(id),
+            () => new DistributedCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
+            }
+        );
+    }
+}
+```
+
+### 4. Performance Optimization
+1. Sử dụng Materialized Path cho cấu trúc phân cấp
+2. Implement lazy loading cho related entities
+3. Sử dụng batch processing cho operations lớn
+4. Optimize database queries
+5. Implement caching strategy phù hợp
+
+### 5. Testing
+1. Unit Tests
+   - Test domain logic
+   - Test validation rules
+   - Test caching
+   - Test performance
+
+2. Integration Tests
+   - Test API endpoints
+   - Test database operations
+   - Test caching layer
+
+## Best Practices
+
+### 1. Code Organization
+- Tách biệt các layers
+- Sử dụng folder structure chuẩn
+- Đặt tên file và class rõ ràng
+
+### 2. Performance
+- Cache data thường xuyên truy cập
+- Optimize database queries
+- Sử dụng lazy loading
+- Implement paging
+
+### 3. Security
+- Implement authorization
+- Validate input data
+- Prevent SQL injection
+- Handle sensitive data
+
+### 4. Error Handling
+- Sử dụng custom exceptions
+- Log errors đầy đủ
+- Return proper error messages
+- Implement retry logic
+
+### 5. Testing
+- Write unit tests
+- Write integration tests
+- Test edge cases
+- Test performance
+
+## Checklist triển khai
+
+### 1. Setup
+- [ ] Generate code base
+- [ ] Review generated code
+- [ ] Setup database
+- [ ] Configure permissions
+
+### 2. Implementation
+- [ ] Implement domain logic
+- [ ] Implement application service
+- [ ] Setup caching
+- [ ] Optimize performance
+
+### 3. Testing
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] Performance tests
+- [ ] Security tests
+
+### 4. Documentation
+- [ ] API documentation
+- [ ] Code documentation
+- [ ] User guide
+- [ ] Deployment guide
+
+## Tips và Tricks
+
+### 1. Sử dụng Script
+- Tận dụng parameters của script
+- Customize templates theo nhu cầu
+- Tạo thêm templates riêng
+
+### 2. Performance
+- Profile code thường xuyên
+- Monitor cache usage
+- Optimize database queries
+- Use appropriate indexes
+
+### 3. Maintenance
+- Keep templates up to date
+- Document changes
+- Share knowledge
+- Review regularly
 
 ## Template Code Snippets
 

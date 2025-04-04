@@ -182,7 +182,7 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
             )
         );
 
-        var input = new CreateUpdateCategoryItemDto
+        var input = new CreateCategoryItemDto
         {
             CategoryTypeId = categoryType.Id,
             Code = "NEW",
@@ -237,7 +237,7 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
             )
         );
 
-        var input = new CreateUpdateCategoryItemDto
+        var input = new CreateCategoryItemDto
         {
             CategoryTypeId = categoryType.Id,
             Code = "CHILD",
@@ -279,7 +279,7 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
             )
         );
 
-        var input = new CreateUpdateCategoryItemDto
+        var input = new UpdateCategoryItemDto
         {
             CategoryTypeId = categoryType.Id,
             Code = "UPDATED",
@@ -297,6 +297,7 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
         // Assert
         result.ShouldNotBeNull();
         result.Id.ShouldBe(categoryItem.Id);
+        result.CategoryTypeId.ShouldBe(input.CategoryTypeId);
         result.Code.ShouldBe(input.Code);
         result.Name.ShouldBe(input.Name);
         result.DisplayOrder.ShouldBe(input.DisplayOrder);
@@ -306,10 +307,10 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
         result.ExtraProperties.ShouldBe(input.ExtraProperties);
 
         // Verify from repository
-        var updatedCategoryItem = await _categoryItemRepository.GetAsync(categoryItem.Id);
-        updatedCategoryItem.ShouldNotBeNull();
-        updatedCategoryItem.Code.ShouldBe(input.Code);
-        updatedCategoryItem.Name.ShouldBe(input.Name);
+        var updatedItem = await _categoryItemRepository.GetAsync(categoryItem.Id);
+        updatedItem.ShouldNotBeNull();
+        updatedItem.Code.ShouldBe(input.Code);
+        updatedItem.Name.ShouldBe(input.Name);
     }
 
     [Fact]
@@ -364,7 +365,7 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
             )
         );
 
-        var input = new CreateUpdateCategoryItemDto
+        var createInput = new CreateCategoryItemDto
         {
             CategoryTypeId = categoryType.Id,
             Code = "TEST",
@@ -374,7 +375,7 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
         // Act & Assert
         await Assert.ThrowsAsync<CategoryCodeAlreadyExistsException>(async () =>
         {
-            await _categoryItemAppService.CreateAsync(input);
+            await _categoryItemAppService.CreateAsync(createInput);
         });
 
         // Should also throw when updating another item with same code
@@ -387,9 +388,16 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
             )
         );
 
+        var updateInput = new UpdateCategoryItemDto
+        {
+            CategoryTypeId = categoryType.Id,
+            Code = "TEST",
+            Name = "Another Test Item"
+        };
+
         await Assert.ThrowsAsync<CategoryCodeAlreadyExistsException>(async () =>
         {
-            await _categoryItemAppService.UpdateAsync(anotherItem.Id, input);
+            await _categoryItemAppService.UpdateAsync(anotherItem.Id, updateInput);
         });
     }
 
@@ -422,7 +430,7 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
             )
         );
 
-        var input = new CreateUpdateCategoryItemDto
+        var input = new CreateCategoryItemDto
         {
             CategoryTypeId = categoryType2.Id,
             Code = "CHILD",
@@ -466,7 +474,7 @@ public class CategoryItemAppServiceTests : CoreOracleApplicationTestBase<CoreOra
             )
         );
 
-        var input = new CreateUpdateCategoryItemDto
+        var input = new UpdateCategoryItemDto
         {
             CategoryTypeId = categoryType2.Id,
             Code = "TEST",

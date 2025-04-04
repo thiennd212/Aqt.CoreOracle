@@ -23,168 +23,7 @@ namespace Aqt.CoreOracle.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Aqt.CoreOracle.Categories.CategoryItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("RAW(16)");
-
-                    b.Property<Guid>("CategoryTypeId")
-                        .HasColumnType("RAW(16)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("CreationTime");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("CreatorId");
-
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("DeleterId");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("DeletionTime");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("NUMBER(10)");
-
-                    b.Property<string>("ExtraProperties")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("BOOLEAN");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BOOLEAN")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("LastModificationTime");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("LastModifierId");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("NVARCHAR2(200)");
-
-                    b.Property<Guid?>("ParentId")
-                        .HasColumnType("RAW(16)");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("NVARCHAR2(500)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentId");
-
-                    b.HasIndex("CategoryTypeId", "Code")
-                        .IsUnique();
-
-                    b.ToTable("AppCategoryItems", (string)null);
-                });
-
-            modelBuilder.Entity("Aqt.CoreOracle.Categories.CategoryType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("RAW(16)");
-
-                    b.Property<bool>("AllowMultipleSelect")
-                        .HasColumnType("BOOLEAN");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("NVARCHAR2(40)")
-                        .HasColumnName("ConcurrencyStamp");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("CreationTime");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("CreatorId");
-
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("DeleterId");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("DeletionTime");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("NVARCHAR2(500)");
-
-                    b.Property<string>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("ExtraProperties");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("BOOLEAN");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BOOLEAN")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
-
-                    b.Property<bool>("IsSystem")
-                        .HasColumnType("BOOLEAN");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("LastModificationTime");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("LastModifierId");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("NVARCHAR2(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("AppCategoryTypes", (string)null);
-                });
-
+            
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2010,24 +1849,6 @@ namespace Aqt.CoreOracle.Migrations
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
                 });
 
-            modelBuilder.Entity("Aqt.CoreOracle.Categories.CategoryItem", b =>
-                {
-                    b.HasOne("Aqt.CoreOracle.Categories.CategoryType", "CategoryType")
-                        .WithMany("Items")
-                        .HasForeignKey("CategoryTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Aqt.CoreOracle.Categories.CategoryItem", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("CategoryType");
-
-                    b.Navigation("Parent");
-                });
-
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>
                 {
                     b.HasOne("Volo.Abp.AuditLogging.AuditLog", null)
@@ -2177,16 +1998,6 @@ namespace Aqt.CoreOracle.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Aqt.CoreOracle.Categories.CategoryItem", b =>
-                {
-                    b.Navigation("Children");
-                });
-
-            modelBuilder.Entity("Aqt.CoreOracle.Categories.CategoryType", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

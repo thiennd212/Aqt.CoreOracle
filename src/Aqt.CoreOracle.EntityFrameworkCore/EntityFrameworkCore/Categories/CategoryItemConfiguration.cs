@@ -21,6 +21,9 @@ public class CategoryItemConfiguration : IEntityTypeConfiguration<CategoryItem>
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(x => x.Description)
+            .HasMaxLength(2000);
+
         builder.Property(x => x.Value)
             .HasMaxLength(500);
 

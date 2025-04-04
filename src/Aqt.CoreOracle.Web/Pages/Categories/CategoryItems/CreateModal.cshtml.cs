@@ -15,7 +15,7 @@ namespace Aqt.CoreOracle.Web.Pages.Categories.CategoryItems;
 public class CreateModalModel : CoreOraclePageModel
 {
     [BindProperty]
-    public CreateUpdateCategoryItemDto CategoryItem { get; set; }
+    public CreateCategoryItemDto CategoryItem { get; set; }
 
     public List<SelectListItem> CategoryTypes { get; set; }
     public List<SelectListItem> Parents { get; set; }
@@ -33,7 +33,7 @@ public class CreateModalModel : CoreOraclePageModel
 
     public async Task OnGetAsync()
     {
-        CategoryItem = new CreateUpdateCategoryItemDto
+        CategoryItem = new CreateCategoryItemDto
         {
             IsActive = true,
             DisplayOrder = 0

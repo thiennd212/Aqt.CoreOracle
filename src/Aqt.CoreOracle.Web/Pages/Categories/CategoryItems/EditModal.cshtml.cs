@@ -19,7 +19,7 @@ public class EditModalModel : CoreOraclePageModel
     public Guid Id { get; set; }
 
     [BindProperty]
-    public CreateUpdateCategoryItemDto CategoryItem { get; set; }
+    public UpdateCategoryItemDto CategoryItem { get; set; }
 
     public List<SelectListItem> CategoryTypes { get; set; }
     public List<SelectListItem> Parents { get; set; }
@@ -38,7 +38,7 @@ public class EditModalModel : CoreOraclePageModel
     public async Task OnGetAsync()
     {
         var categoryItem = await _categoryItemAppService.GetAsync(Id);
-        CategoryItem = ObjectMapper.Map<CategoryItemDto, CreateUpdateCategoryItemDto>(categoryItem);
+        CategoryItem = ObjectMapper.Map<CategoryItemDto, UpdateCategoryItemDto>(categoryItem);
 
         await PopulateSelectListsAsync();
     }
@@ -61,17 +61,15 @@ public class EditModalModel : CoreOraclePageModel
             .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
             .ToList();
 
-        var parents = await _categoryItemAppService.GetListAsync(new CategoryItemGetListInput
+        var items = await _categoryItemAppService.GetListAsync(new CategoryItemGetListInput
         {
-            CategoryTypeId = CategoryItem.CategoryTypeId,
             MaxResultCount = 1000,
-            IsActive = true
+            CategoryTypeId = CategoryItem.CategoryTypeId
         });
 
-        Parents = parents.Items
-            .Where(x => x.Id != Id) // Exclude self from parent list
+        Parents = items.Items
+            .Where(x => x.Id != Id)
             .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
-            .Prepend(new SelectListItem(L["None"], ""))
             .ToList();
     }
 } 
