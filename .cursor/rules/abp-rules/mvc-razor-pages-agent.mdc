@@ -16,7 +16,7 @@ description: "This rule governs MVC and Razor Pages development in ABP Framework
 (9) Implementing view caching strategies
 (10) Working with JavaScript/CSS in MVC applications"
 globs: ""
-alwaysApply: false
+alwaysApply: true
 ---
 
 # MVC & Razor Pages Development Guidelines

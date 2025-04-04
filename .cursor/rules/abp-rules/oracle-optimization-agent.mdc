@@ -13,7 +13,7 @@ description: "This rule governs Oracle database optimization in ABP applications
 (6) Implementing query caching
 (7) Monitoring database performance"
 globs: ""
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Oracle Database Optimization Guidelines

@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Aqt.CoreOracle.Domain\Aqt.CoreOracle.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Aqt.CoreOracle.Application.Contracts\Aqt.CoreOracle.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Aqt.CoreOracle.Application\Aqt.CoreOracle.Application.csproj" />
     <ProjectReference Include="..\Aqt.CoreOracle.TestBase\Aqt.CoreOracle.TestBase.csproj" />
   </ItemGroup>
 

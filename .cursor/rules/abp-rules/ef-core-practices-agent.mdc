@@ -16,7 +16,7 @@ description: "This rule governs Entity Framework Core implementation in ABP appl
 (9) Working with large datasets
 (10) Implementing audit logging"
 globs: ""
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Entity Framework Core Best Practices

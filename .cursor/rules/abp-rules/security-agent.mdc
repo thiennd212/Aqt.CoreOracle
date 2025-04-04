@@ -14,7 +14,7 @@ description: "This rule governs security implementation in ABP applications. App
 (7) Working with identity management
 (8) Implementing secure communication"
 globs: ""
-alwaysApply: false
+alwaysApply: true
 ---
 
 # ABP Security Implementation Guidelines

@@ -16,7 +16,7 @@ description: "This rule governs ABP Framework's modular architecture implementat
 (9) Configuring module options
 (10) Implementing dynamic API controllers"
 globs: ""
-alwaysApply: false
+alwaysApply: true
 ---
 
 # ABP Modular Architecture Guidelines

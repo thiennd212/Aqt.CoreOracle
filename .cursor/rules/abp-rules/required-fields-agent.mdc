@@ -1,0 +1,281 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "This rule governs the implementation of required and optional fields in ABP applications. Apply when:
+(1) Creating or modifying entities
+(2) Creating or modifying DTOs
+(3) Implementing application services
+(4) Writing unit tests
+(5) Implementing validation logic
+(6) Working with form submissions
+(7) Handling data persistence"
+globs: ""
+alwaysApply: true
+---
+
+# Required and Optional Fields Implementation Guidelines
+
+```mermaid
+graph TD
+    A[Entity] <--> |AutoMapper| B[DTOs]
+    B --> C[Application Service]
+    C --> D[Repository]
+    E[Unit Tests] --> A
+    E --> B
+    E --> C
+```
+
+## Critical Rules
+- Sử dụng entity làm gốc để xác định các trường bắt buộc/không bắt buộc
+- Đánh dấu các trường bắt buộc trong entity với [Required] attribute
+- Sử dụng Data Annotations trong DTOs để validate input
+- Đảm bảo tính nhất quán giữa entity và DTOs
+- Xử lý null/empty values cho các trường không bắt buộc
+- Tuân thủ nguyên tắc "fail fast" cho các trường bắt buộc
+- Sử dụng AutoMapper để map trực tiếp giữa DTOs và Entity
+- Cấu hình AutoMapper Profile riêng cho mỗi module
+
+## Examples
+
+<example>
+```csharp
+// Entity with required fields
+public class CategoryType : FullAuditedAggregateRoot<Guid>
+{
+    [Required]
+    [StringLength(50)]
+    public virtual string Code { get; set; }
+
+    [Required] 
+    [StringLength(100)]
+    public virtual string Name { get; set; }
+
+    [StringLength(500)]
+    public virtual string Description { get; set; } // Optional field
+
+    public virtual bool IsActive { get; set; }
+    public virtual bool AllowMultipleSelect { get; set; }
+}
+
+// DTO with Data Annotations
+public class CategoryTypeDto
+{
+    public Guid Id { get; set; }
+
+    [Required]
+    [StringLength(50)]
+    public string Code { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    public string Name { get; set; }
+
+    [StringLength(500)]
+    public string Description { get; set; } // Optional
+
+    public bool IsActive { get; set; }
+    public bool AllowMultipleSelect { get; set; }
+}
+
+// AutoMapper Profile
+public class CategoryTypeProfile : Profile
+{
+    public CategoryTypeProfile()
+    {
+        CreateMap<CategoryTypeDto, CategoryType>()
+            .ForMember(dest => dest.Description, opt => opt.NullSubstitute(""));
+
+        CreateMap<CategoryType, CategoryTypeDto>();
+    }
+}
+
+// Application Service
+public class CategoryTypeAppService : ApplicationService, ICategoryTypeAppService
+{
+    private readonly IRepository<CategoryType, Guid> _repository;
+    private readonly IMapper _mapper;
+
+    public CategoryTypeAppService(
+        IRepository<CategoryType, Guid> repository,
+        IMapper mapper)
+    {
+        _repository = repository;
+        _mapper = mapper;
+    }
+
+    public async Task<CategoryTypeDto> CreateAsync(CategoryTypeDto input)
+    {
+        // Validate using Data Annotations
+        await ValidateAsync(input);
+
+        // Validate business rules
+        await ValidateBusinessRulesAsync(input);
+
+        // Map DTO to entity and save
+        var categoryType = _mapper.Map<CategoryTypeDto, CategoryType>(input);
+        await _repository.InsertAsync(categoryType);
+
+        // Return mapped dto
+        return _mapper.Map<CategoryType, CategoryTypeDto>(categoryType);
+    }
+
+    private async Task ValidateBusinessRulesAsync(CategoryTypeDto input)
+    {
+        // Validate unique code
+        var exists = await _repository.AnyAsync(x => x.Code == input.Code);
+        if (exists)
+        {
+            throw new BusinessException(CoreOracleDomainErrorCodes.CategoryTypeCodeAlreadyExists)
+                .WithData("Code", input.Code);
+        }
+    }
+}
+
+// Test cases
+public class CategoryTypeAppServiceTests : CoreOracleApplicationTestBase
+{
+    private readonly ICategoryTypeAppService _categoryTypeAppService;
+    private readonly IRepository<CategoryType, Guid> _categoryTypeRepository;
+
+    public CategoryTypeAppServiceTests()
+    {
+        _categoryTypeAppService = GetRequiredService<ICategoryTypeAppService>();
+        _categoryTypeRepository = GetRequiredService<IRepository<CategoryType, Guid>>();
+    }
+
+    [Fact]
+    public async Task Should_Create_CategoryType()
+    {
+        // Arrange
+        var input = new CategoryTypeDto
+        {
+            Code = "TEST",
+            Name = "Test Category",
+            Description = "Test Description",
+            IsActive = true
+        };
+
+        // Act
+        var result = await _categoryTypeAppService.CreateAsync(input);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Code.ShouldBe(input.Code);
+        result.Name.ShouldBe(input.Name);
+        result.Description.ShouldBe(input.Description);
+        result.IsActive.ShouldBe(input.IsActive);
+
+        var categoryType = await _categoryTypeRepository.FindAsync(result.Id);
+        categoryType.ShouldNotBeNull();
+        categoryType.Code.ShouldBe(input.Code);
+    }
+
+    [Fact]
+    public async Task Should_Create_With_Default_Values()
+    {
+        // Arrange
+        var input = new CategoryTypeDto
+        {
+            Code = "TEST",
+            Name = "Test Category"
+        };
+
+        // Act
+        var result = await _categoryTypeAppService.CreateAsync(input);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Description.ShouldBe("");
+        result.IsActive.ShouldBe(false);
+        result.AllowMultipleSelect.ShouldBe(false);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    public async Task Should_Not_Create_With_Invalid_Code(string code)
+    {
+        // Arrange
+        var input = new CategoryTypeDto
+        {
+            Code = code,
+            Name = "Test Category"
+        };
+
+        // Act & Assert
+        await Should.ThrowAsync<AbpValidationException>(async () =>
+        {
+            await _categoryTypeAppService.CreateAsync(input);
+        });
+    }
+}
+```
+</example>
+
+<example type="invalid">
+```csharp
+// Invalid Application Service with manual mapping
+public class BadCategoryTypeAppService
+{
+    private readonly DbContext _dbContext;
+
+    public BadCategoryTypeAppService(DbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public async Task<CategoryTypeDto> CreateAsync(CategoryTypeDto input)
+    {
+        // Manual mapping without validation
+        var categoryType = new CategoryType
+        {
+            Code = input.Code,
+            Name = input.Name,
+            Description = input.Description // No null check
+        };
+
+        _dbContext.CategoryTypes.Add(categoryType);
+        await _dbContext.SaveChangesAsync();
+
+        // Manual mapping back to DTO
+        return new CategoryTypeDto
+        {
+            Id = categoryType.Id,
+            Code = categoryType.Code,
+            Name = categoryType.Name,
+            Description = categoryType.Description
+        };
+    }
+}
+
+// Invalid test without proper validation
+public class BadCategoryTypeTests
+{
+    private readonly BadCategoryTypeAppService _service;
+
+    public BadCategoryTypeTests()
+    {
+        _service = new BadCategoryTypeAppService(null);
+    }
+
+    [Fact]
+    public async Task Create_CategoryType()
+    {
+        var input = new CategoryTypeDto
+        {
+            Code = "TEST",
+            Name = "Test"
+        };
+
+        var result = await _service.CreateAsync(input);
+        
+        // Missing validation checks
+        Assert.NotNull(result);
+    }
+}
+```
+</example>

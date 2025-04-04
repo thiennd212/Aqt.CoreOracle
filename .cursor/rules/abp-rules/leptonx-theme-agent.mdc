@@ -12,7 +12,7 @@ description: "This rule governs the implementation and customization of LeptonX 
 (5) Using or extending LeptonX UI components
 (6) Creating layout templates"
 globs: ""
-alwaysApply: false
+alwaysApply: true
 ---
 
 # LeptonX Lite Theme Implementation Guidelines

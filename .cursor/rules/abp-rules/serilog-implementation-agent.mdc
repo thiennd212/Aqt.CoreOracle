@@ -13,7 +13,7 @@ description: "This rule governs Serilog implementation in ABP applications. Appl
 (6) Troubleshooting application issues through logs
 (7) Implementing custom log enrichers"
 globs: ""
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Serilog Implementation Guidelines

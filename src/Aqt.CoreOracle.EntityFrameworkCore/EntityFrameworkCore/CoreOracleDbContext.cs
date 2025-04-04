@@ -16,7 +16,6 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Volo.Abp.AuditLogging;
 using Volo.Abp.OpenIddict.Tokens;
-using Aqt.CoreOracle.Categories;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection.Emit;
 using System.Linq;
@@ -60,9 +59,6 @@ public class CoreOracleDbContext :
     // Tenant Management
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
-
-    public DbSet<CategoryType> CategoryTypes { get; set; }
-    public DbSet<CategoryItem> CategoryItems { get; set; }
 
     #endregion
 
