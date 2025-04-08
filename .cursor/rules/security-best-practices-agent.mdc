@@ -1,0 +1,161 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Apply this rule when implementing or reviewing security aspects of an ABP Framework (MVC/Razor Pages) application. This includes authentication, authorization (permissions, policies), input validation/sanitization, preventing common web vulnerabilities (XSS, CSRF), HTTPS usage, and dependency management.
+globs: **/*.cs, **/*.cshtml, appsettings.json
+alwaysApply: true
+---
+
+# Security Best Practices (ABP & MVC)
+
+## Critical Rules
+
+- **Authentication:** Use ABP's built-in authentication mechanisms (typically ASP.NET Core Identity integrated with OpenIddict for token-based auth). Configure authentication schemes correctly. Avoid rolling your own authentication.
+- **Authorization:** Leverage ABP's authorization system:
+    - Define permissions (`PermissionDefinitionProvider`).
+    - Use `[Authorize]` attribute with permission names or policy names on Application Services, PageModels, Controllers, or methods.
+    - Inject `IAuthorizationService` for more complex programmatic checks (`await _authorizationService.IsGrantedAsync(...)`).
+- **HTTPS:** Enforce HTTPS for all communication in production environments (configure Kestrel/IIS/Reverse Proxy). Use HSTS (HTTP Strict Transport Security) headers.
+- **Input Validation & Sanitization:**
+    - Use ABP/ASP.NET Core's validation (Data Annotations, FluentValidation) on DTOs and ViewModels to validate incoming data (`ModelState.IsValid` is checked automatically by ABP in many cases).
+    - Sanitize output displayed in HTML to prevent Cross-Site Scripting (XSS). Razor automatically HTML-encodes output by default, but be careful when using `@Html.Raw()` or injecting JavaScript. Use an anti-XSS library if necessary for complex scenarios.
+- **Cross-Site Request Forgery (CSRF):** Rely on ABP/ASP.NET Core's built-in anti-CSRF token generation and validation (enabled by default for form posts). Ensure forms include the anti-forgery token (often handled automatically by Tag Helpers like `<form>`).
+- **Dependency Management:** Regularly update ABP packages (`abp update`) and other NuGet dependencies to patch known security vulnerabilities. Use tools like `dotnet list package --vulnerable`.
+- **Secrets Management:** Do not hardcode secrets (API keys, connection strings, passwords) in source code. Use configuration providers like User Secrets (development), Azure Key Vault, HashiCorp Vault, or environment variables.
+- **Error Handling:** Configure exception handling (`UseExceptionHandler`) to avoid leaking sensitive information (stack traces) in production responses. Log detailed errors server-side.
+
+## Examples
+
+<example>
+  // Using Authorization in an Application Service
+  /*
+  // Assuming: using Microsoft.AspNetCore.Authorization;
+  // Assuming: using Volo.Abp.Application.Services;
+
+  // Define permissions (e.g., in MyProjectPermissions.cs and MyProjectPermissionDefinitionProvider.cs)
+  public static class MyProjectPermissions {
+      public const string GroupName = "MyProject";
+      public static class Products {
+          public const string Default = GroupName + ".Products";
+          public const string Delete = Default + ".Delete";
+      }
+  }
+
+  // Apply authorization attribute
+  [Authorize(MyProjectPermissions.Products.Default)] // Requires user to have the 'MyProject.Products' permission
+  public class ProductAppService : ApplicationService, IProductAppService
+  {
+      private readonly IRepository<Product, Guid> _productRepository;
+      private readonly IAuthorizationService _authorizationService; // Inject for programmatic checks
+
+      public ProductAppService(IRepository<Product, Guid> repository, IAuthorizationService authorizationService)
+      {
+          _productRepository = repository;
+          _authorizationService = authorizationService;
+      }
+
+      public async Task<ProductDto> GetAsync(Guid id) { /* ... */ }
+
+      [Authorize(MyProjectPermissions.Products.Delete)] // Requires specific 'Delete' permission
+      public async Task DeleteAsync(Guid id) 
+      {
+            // Optional: Add extra programmatic check if needed
+            // var isAllowed = await _authorizationService.IsGrantedAsync(MyProjectPermissions.Products.Delete);
+            // if (!isAllowed) { throw new AbpAuthorizationException("Not allowed!"); }
+          
+          await _productRepository.DeleteAsync(id); 
+      }
+  }
+  */
+
+  // ViewModel with Input Validation
+  /*
+  public class CreateProductViewModel 
+  {
+      [Required]
+      [StringLength(ProductConsts.MaxNameLength)] // Use constants for lengths
+      [RegularExpression("^[a-zA-Z0-9 ]*$")] // Example regex validation
+      public string Name { get; set; }
+
+      [Range(0, 9999.99)]
+      public decimal Price { get; set; }
+  }
+  // Validation is checked automatically in PageModels/Controllers
+  */
+
+  // Secure Configuration (appsettings.json referencing User Secrets or Key Vault)
+  /*
+  {
+    "ConnectionStrings": {
+      "Default": "See User Secrets or Key Vault" // Avoid storing in source control
+    },
+    "AuthServer": {
+       "Authority": "https://localhost:44300/", // Use HTTPS
+       "ClientId": "MyWebApp",
+       "ClientSecret": "See User Secrets or Key Vault" 
+    },
+    "AzureKeyVault": { // Example Key Vault config
+       "Enable": true,
+       "Uri": "https://mykeyvault.vault.azure.net/" 
+    }
+  }
+  */
+</example>
+
+<example type="invalid">
+  // Missing Authorization checks
+  /*
+  public class InsecureProductService : ApplicationService 
+  {
+      // No [Authorize] attribute
+      public async Task DeleteProductAsync(Guid id) 
+      {
+          // Anyone authenticated (or even anonymous if auth not enforced globally) can call this.
+          // ... delete logic ...
+      }
+  }
+  */
+
+  // Manual authorization based only on role string (less flexible than permissions)
+  /*
+  if (!_currentUser.IsInRole("admin")) // Hardcoded role check
+  {
+      throw new AbpAuthorizationException("Only admins allowed");
+  }
+  */
+  
+  // Ignoring Input Validation
+  /*
+  public class NoValidationViewModel 
+  {
+      public string UnsafeInput { get; set; } // No attributes ([Required], [StringLength], etc.)
+  }
+
+  // In PageModel/Controller
+  public async Task OnPostAsync(NoValidationViewModel input) 
+  {
+      // No check for ModelState.IsValid (though ABP might auto-validate if configured)
+      // Direct use of input.UnsafeInput without validation could lead to errors or vulnerabilities.
+      var entity = new SomeEntity { Value = input.UnsafeInput }; 
+  }
+  */
+
+  // Rendering un-sanitized input (XSS vulnerability) in Razor
+  /*
+  // In PageModel
+  public string UserComment { get; set; } = "<script>alert('XSS!');</script>"; 
+
+  // In Razor Page (.cshtml)
+  <div>User comment: @Html.Raw(Model.UserComment)</div> 
+  // PROBLEM: Html.Raw() bypasses Razor's default encoding, executing the script. Use @Model.UserComment instead.
+  */
+
+  // Hardcoding secrets in code
+  /*
+  var connectionString = "Server=.;Database=mydb;User ID=sa;Password=MyInsecurePassword;"; // Very Bad Practice!
+  options.UseSqlServer(connectionString);
+  */
+</example>

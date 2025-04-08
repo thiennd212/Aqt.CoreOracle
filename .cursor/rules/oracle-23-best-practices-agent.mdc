@@ -1,0 +1,109 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Apply this rule when configuring, querying, or optimizing an ABP application that uses Oracle Database (specifically version 23c or considerations for recent Oracle versions). This includes connection strings, provider configuration, using Oracle-specific features (like JSON Relational Duality, partitioning), data types, indexing strategies, and performance tuning related to Oracle.
+globs: **/*.cs, appsettings.json
+alwaysApply: true
+---
+
+# Oracle 23 Best Practices (ABP)
+
+## Critical Rules
+
+- **Provider Configuration:** Ensure the correct `Volo.Abp.EntityFrameworkCore.Oracle` NuGet package is referenced and the EF Core provider is configured correctly in your `DbContext` module (e.g., `UseOracle()`).
+- **Connection Pooling:** Verify that connection pooling is enabled and configured appropriately in the connection string or configuration for optimal performance. Avoid opening/closing connections manually.
+- **Oracle-Specific Features:** Consider leveraging Oracle-specific features where applicable and beneficial:
+    - **Partitioning:** Use table partitioning for very large tables to improve query performance and manageability (requires careful planning).
+    - **JSON Relational Duality Views (Oracle 23c+):** Explore JSON Relational Duality Views for simplified development combining relational data storage with JSON document access patterns if using Oracle 23c or later.
+    - **Advanced Indexing:** Utilize Oracle's advanced indexing options (e.g., function-based indexes, bitmap indexes where appropriate) beyond standard B-tree indexes if query analysis indicates a benefit.
+- **Data Types:** Use Oracle-specific data types (`NVARCHAR2`, `NCLOB`, `TIMESTAMP WITH TIME ZONE`, etc.) via Fluent API (`HasColumnType`) when necessary for compatibility or specific features, but prefer standard EF Core types where possible for portability.
+- **Query Optimization:** Analyze query execution plans (using Oracle tools) for performance bottlenecks. Ensure proper indexing strategies are in place for common query predicates and joins. Be mindful of case sensitivity in Oracle identifiers if not using quoted identifiers.
+- **Case Sensitivity:** Remember Oracle defaults to uppercase for non-quoted identifiers. Be consistent with casing in EF Core mappings and queries or use quoted identifiers if needed.
+
+## Examples
+
+<example>
+  // Configuring Oracle in DbContext module (MyProject.EntityFrameworkCore)
+  /*
+  [DependsOn(typeof(AbpEntityFrameworkCoreModule))]
+  public class MyProjectEntityFrameworkCoreModule : AbpModule
+  {
+      public override void ConfigureServices(ServiceConfigurationContext context)
+      {
+          var configuration = context.Services.GetConfiguration();
+          context.Services.AddAbpDbContext<MyDbContext>(options =>
+          {
+              options.AddDefaultRepositories(includeAllEntities: true);
+
+              options.UseOracle(configuration.GetConnectionString("Default"), oracleOptions => {
+                  // Optional: Specify Oracle version if needed for compatibility features
+                  // oracleOptions.UseOracleSQLCompatibility("19"); // Example
+              });
+          });
+          // ... other configurations
+      }
+  }
+  */
+
+  // Using Fluent API to specify Oracle data type in OnModelCreating
+  /*
+  protected override void OnModelCreating(ModelBuilder builder)
+  {
+      base.OnModelCreating(builder);
+
+      builder.Entity<MyEntity>(b =>
+      {
+          b.ToTable("MyEntities"); // Explicit table name (consider casing)
+          b.Property(x => x.Description).HasColumnType("NCLOB"); // Oracle specific type for large text
+          b.Property(x => x.LegacyCode).HasColumnType("VARCHAR2(50)"); 
+          b.Property(x => x.EventTimestamp).HasColumnType("TIMESTAMP(6) WITH TIME ZONE");
+          
+          // Example of a function-based index (syntax might vary based on raw SQL helper)
+          // b.HasIndex(x => x.LastName).HasName("IX_MyEntities_LastNameUpper")
+          //    .HasFilter($"UPPER(\"LastName\")"); // Filter/Expression depends on EF Core version/provider capabilities
+      });
+  }
+  */
+
+   // Connection String Example (appsettings.json) - Ensure Pooling is default (True)
+  /*
+  {
+    "ConnectionStrings": {
+      "Default": "User ID=myuser;Password=mypassword;Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=myoracleserver.mydomain.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=myservice))); Pooling=true; Min Pool Size=5; Max Pool Size=100; Connection Lifetime=120;"
+    }
+  }
+  */
+</example>
+
+<example type="invalid">
+  // Missing Oracle Provider Configuration
+  /*
+  context.Services.AddAbpDbContext<MyDbContext>(options => {
+      // Forgetting options.UseOracle(...) completely
+      options.AddDefaultRepositories(true); 
+      // This would likely default to SQL Server or another provider, causing runtime errors.
+  });
+  */
+  
+  // Ignoring case sensitivity (if not handled by EF Core provider automatically)
+  /*
+  // Querying using wrong case without quotes
+  var results = await _dbContext.MyEntities.Where(e => e.legacyCode == "abc").ToListAsync(); // 'legacyCode' might fail if Oracle stores it as 'LEGACYCODE'
+  */
+
+  // Using generic types where Oracle specific types are required for functionality
+  /*
+  builder.Entity<MyEntity>(b => {
+      // Using string for potentially very large text instead of NCLOB might lead to truncation or performance issues
+      b.Property(x => x.VeryLargeText).HasMaxLength(null); // EF Core default might not map optimally to NCLOB
+  });
+  */
+  
+  // Disabling connection pooling in connection string - Bad Practice for performance
+  /*
+   "Default": "User ID=...;Data Source=...;Pooling=false;" 
+  */
+</example>

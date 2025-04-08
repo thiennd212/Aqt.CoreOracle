@@ -1,0 +1,88 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Apply this rule when customizing UI/UX or implementing front-end components in an ABP project using LeptonX Lite. This includes applying theme styles, using its layout, ensuring responsiveness, utilizing built-in components/Tag Helpers, and importantly, overriding theme components (.cshtml or .cs) correctly. Relevant for CSS/SCSS/JS changes, .cshtml modifications, and component customization. Source: https://abp.io/docs/latest/ui-themes/lepton-x-lite/asp-net-core
+globs: **/*.cshtml, **/*.css, **/*.scss, **/*.js
+alwaysApply: true
+---
+
+# LeptonX Lite Theme Best Practices (ABP)
+
+## Critical Rules
+
+- **Adhere to Design Guidelines:** Follow LeptonX Lite's visual style, component usage, and spacing for consistency.
+- **Prefer ABP Theming System & Overrides:**
+    - Use ABP's built-in mechanisms for customization:
+        - Override CSS variables (in `:root` within `global-styles.css` or bundle contributors).
+        - Add custom styles in `global-styles.css` or dedicated CSS/SCSS bundle contributors.
+        - **Override Component Views/Logic:** To customize specific components (like Breadcrumbs, Menu, UserMenu, etc.), create files with the **exact same name and relative path** within your project (e.g., create `Pages/Shared/Components/Themes/LeptonXLite/Components/UserMenu/Default.cshtml` in your Web project to override the User Menu view). Refer to LeptonX Lite docs for component paths. [(https://abp.io/docs/latest/ui-themes/lepton-x-lite/asp-net-core#component-override-mechanism)
+    - **Avoid** directly modifying LeptonX Lite files in `node_modules` or `/libs`.
+- **Utilize Built-in Components & Tag Helpers:** Leverage LeptonX Lite components (Buttons, Cards, Modals, Alerts, Forms, etc.) often exposed via ABP Tag Helpers (`<abp-card>`, `<abp-button>`, `<abp-dynamic-form>`, etc.) before building custom ones.
+- **Ensure Responsiveness:** Use responsive techniques (e.g., Bootstrap grid system `row`, `col-*`) as expected by the theme to ensure adaptability across devices.
+- **Minimize Custom CSS:** Rely on theme utility classes and Tag Helper attributes first. Organize any necessary custom CSS logically.
+
+## Examples
+
+<example>
+  // Leveraging LeptonX/Bootstrap components and ABP Tag Helpers in a .cshtml file
+  /*
+  @page
+  @model IndexModel 
+  @using Volo.Abp.AspNetCore.Mvc.UI.Layout // For IPageLayout
+  @inject IPageLayout PageLayout
+
+  @{
+      PageLayout.Content.Title = "Dashboard"; // Using ABP Layout API
+      PageLayout.Content.BreadCrumb.Add("Home"); // Adding breadcrumb item
+  }
+  
+  <abp-card> @* Using ABP Card Tag Helper (styles provided by LeptonX) *@
+      <abp-card-header>Welcome</abp-card-header>
+      <abp-card-body>
+          <p>This content uses the standard LeptonX card styling.</p>
+          <abp-button button-type="Primary">Primary Action</abp-button> @* LeptonX styled button *@
+      </abp-card-body>
+  </abp-card>
+
+  <div class="row"> @* Using Bootstrap grid for responsiveness *@
+      <div class="col-md-6"> 
+          <abp-card><abp-card-body>Content Area 1</abp-card-body></abp-card>
+      </div>
+      <div class="col-md-6">
+          <abp-card><abp-card-body>Content Area 2</abp-card-body></abp-card>
+      </div>
+  </div> 
+  */
+
+  // Customizing CSS variable in global-styles.css (or a bundle contributor)
+  /*
+  :root {
+      --lpx-theme-brand-color: #AD1A7F; // Overriding default brand color
+  }
+  */
+  
+  // Example: How to override the User Menu component's view
+  // 1. Create the file: /Pages/Shared/Components/Themes/LeptonXLite/Components/UserMenu/Default.cshtml in your Web project.
+  // 2. Copy the original content from the theme source (if needed) and modify it.
+  // (This rule doesn't contain the actual override code, just illustrates the principle)
+</example>
+
+<example type="invalid">
+  // In MyPage.cshtml
+  /*
+  // Ignoring theme components and styles
+  <div style="border: 1px solid black; padding: 15px; background-color: #f0f0f0;"> @* Custom inline styles instead of using abp-card or theme classes *@
+      <h3>Welcome Section</h3> 
+      <button style="background-color: green; color: white;">My Button</button> @* Custom button style *@
+  </div>
+
+  // Ignoring responsiveness - fixed width layout
+  <div style="width: 800px;"> Content... </div>
+  */
+  
+  // Directly modifying LeptonX theme files in /wwwroot/libs/lepton-x/ (will be overwritten on update)
+  // instead of using the proper override mechanism or CSS variable customization.
+</example>
