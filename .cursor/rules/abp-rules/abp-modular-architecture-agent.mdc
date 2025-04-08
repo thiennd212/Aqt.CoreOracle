@@ -55,6 +55,48 @@ graph TD
 - Implement proper module permissions và authorization
 - Sử dụng ISettingProvider cho module settings
 
+1. **Domain.Shared Layer**
+   - Constants và validation rules
+   - Error codes
+   - Enums và types dùng chung
+   - Localization resources
+   ❌ KHÔNG đặt constants/error codes ở Domain layer
+
+2. **Domain Layer**
+   - Entities với các properties và validation
+   - Repository interfaces
+   - Domain events (nếu cần)
+   ❌ KHÔNG implement domain services trừ khi:
+     + Business logic phức tạp cần tái sử dụng ở nhiều nơi
+     + Có nhiều business rules phức tạp liên quan đến nhiều entities
+     + Cần xử lý domain events phức tạp
+
+3. **EntityFrameworkCore Layer**
+   - Entity configurations
+   - Repository implementations
+   - DbContext configuration
+   - Migration scripts
+
+4. **Application.Contracts Layer**
+   - DTOs 
+   - Application service interfaces
+   - Permission definitions
+   - CreateDto.cs
+        + Id: Guid [IgnoreMap] # Sẽ được set bởi GuidGenerator trong Application Service
+
+5. **Application Layer**
+   - Business logic trong application services
+   - Validation logic
+   - Authorization checks
+   - Event handlers
+   - Background jobs (nếu cần)
+
+6. **Web Layer**
+   - Razor pages/Controllers
+   - View models
+   - JavaScript/TypeScript files
+   - UI components
+
 ## Examples
 
 <example>
