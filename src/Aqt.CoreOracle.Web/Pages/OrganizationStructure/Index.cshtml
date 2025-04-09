@@ -1,0 +1,141 @@
+@page
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Aqt.CoreOracle.Localization
+@using Aqt.CoreOracle.Permissions
+@using Aqt.CoreOracle.Web.Pages.OrganizationStructure
+@model IndexModel
+@inject IHtmlLocalizer<CoreOracleResource> L
+@inject IAuthorizationService AuthorizationService
+@{
+    ViewBag.Title = L["Menu:OrganizationStructure"].Value;
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/libs/jstree/dist/themes/default/style.min.css" asp-append-version="true" />
+    <style>
+        #OrganizationUnitTreeContainer {
+            overflow: auto;
+            max-height: 80vh;
+        }
+        #OrganizationUnitDetails {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+}
+
+@section scripts {
+    <script src="~/libs/jstree/dist/jstree.min.js" asp-append-version="true"></script>
+    <script>
+        // Truyền các permissions từ C# sang JavaScript
+        var ouPermissions = {
+            create: '@Model.OuCreatePermission',
+            update: '@Model.OuUpdatePermission',
+            delete: '@Model.OuDeletePermission',
+            assignPosition: '@Model.AssignPositionPermission'
+        };
+    </script>
+    <script src="~/Pages/OrganizationStructure/Index.js" asp-append-version="true"></script>
+}
+
+<abp-card>
+    <abp-card-header>
+        <abp-row>
+            <abp-column size-md="_6">
+                <h2>@L["OrganizationTree"]</h2>
+            </abp-column>
+            <abp-column size-md="_6" class="text-end">
+                @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.OrganizationUnits.Create))
+                {
+                    <abp-button id="NewRootOuButton" 
+                               text="@L["NewRootOU"].Value"
+                               icon="plus"
+                               button-type="Primary" />
+                }
+            </abp-column>
+        </abp-row>
+    </abp-card-header>
+    <abp-card-body>
+        <abp-row>
+            <!-- Cột trái: Cây OU -->
+            <abp-column size-md="_4">
+                <div id="OrganizationUnitTreeContainer">
+                    <div id="OrganizationUnitTree"></div>
+                </div>
+            </abp-column>
+            
+            <!-- Cột phải: Chi tiết OU và Bảng thành viên -->
+            <abp-column size-md="_8">
+                <!-- Chi tiết OU -->
+                <div id="OrganizationUnitDetails" class="mb-3" style="display: none;">
+                    <!-- Nội dung sẽ được cập nhật từ JavaScript -->
+                    <div class="row">
+                        <div class="col-md-6" id="OuDetailsHeader">
+                            <!-- Tên OU sẽ được thêm ở đây -->
+                        </div>
+                        <div class="col-md-6 text-end" id="OuDetailsActions">
+                            <!-- Các nút Edit, Delete, Add Child sẽ được thêm ở đây -->
+                             @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.OrganizationUnits.Create))
+                             {
+                                 <abp-button id="AddChildOuButton"
+                                             text="@L["NewChildOU"].Value"
+                                             icon="plus"
+                                             button-type="Info"
+                                             size="Small"
+                                             class="ms-1"
+                                             style="display: none;"/> // Ẩn ban đầu
+                             }
+                             @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.OrganizationUnits.Update))
+                             {
+                                 <abp-button id="EditOuButton"
+                                             text="@L["Edit"].Value"
+                                             icon="edit"
+                                             button-type="Primary"
+                                             size="Small"
+                                             class="ms-1"
+                                             style="display: none;"/> // Ẩn ban đầu
+                             }
+                             @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.OrganizationUnits.Delete))
+                             {
+                                  <abp-button id="DeleteOuButton"
+                                              text="@L["Delete"].Value"
+                                              icon="trash"
+                                              button-type="Danger"
+                                              size="Small"
+                                              class="ms-1"
+                                              style="display: none;"/> // Ẩn ban đầu
+                             }
+                        </div>
+                    </div>
+                    <div class="row mt-2" id="OuDetailsBody">
+                         <!-- Các thông tin khác (SyncCode, Address, Type) sẽ được thêm ở đây -->
+                    </div>
+                </div>
+                
+                <!-- Bảng thành viên -->
+                <abp-card>
+                    <abp-card-header>
+                        <abp-row>
+                            <abp-column size-md="_6">
+                                <h3>@L["Members"]</h3>
+                            </abp-column>
+                            <abp-column size-md="_6" class="text-end">
+                                <abp-button id="AssignPositionButton"
+                                           text="@L["AssignPosition"].Value"
+                                           icon="plus"
+                                           button-type="Primary"
+                                           abp-visible="@await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.AssignPositions)" />
+                            </abp-column>
+                        </abp-row>
+                    </abp-card-header>
+                    <abp-card-body>
+                        <abp-table striped-rows="true" id="MembersTable"></abp-table>
+                    </abp-card-body>
+                </abp-card>
+            </abp-column>
+        </abp-row>
+    </abp-card-body>
+</abp-card> 

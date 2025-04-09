@@ -1,9 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Aqt.CoreOracle.Localization;
+using Aqt.CoreOracle.Domain.Shared.OrganizationUnits;
+using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Identity;
+using Volo.Abp.Localization;
 using Volo.Abp.ObjectExtending;
+using Volo.Abp.ObjectExtending.Modularity;
 using Volo.Abp.Threading;
 
-namespace Aqt.CoreOracle;
+namespace Aqt.CoreOracle.Domain.Shared;
 
 public static class CoreOracleModuleExtensionConfigurator
 {
@@ -37,35 +41,51 @@ public static class CoreOracleModuleExtensionConfigurator
 
     private static void ConfigureExtraProperties()
     {
-        /* You can configure extra properties for the
-         * entities defined in the modules used by your application.
-         *
-         * This class can be used to define these extra properties
-         * with a high level, easy to use API.
-         *
-         * Example: Add a new property to the user entity of the identity module
+        ObjectExtensionManager.Instance.Modules()
+            .ConfigureIdentity(identity =>
+            {
+                identity.ConfigureOrganizationUnit(ou =>
+                {
+                    ou.AddOrUpdateProperty<string>(
+                        CoreOracleConsts.OrganizationUnitAddress,
+                        property =>
+                        {
+                            property.Attributes.Add(
+                                new MaxLengthAttribute(
+                                    CoreOracleConsts.MaxOrganizationUnitAddressLength
+                                )
+                            );
+                            property.DisplayName = L("OrganizationUnit:Address");
+                        }
+                    );
 
-           ObjectExtensionManager.Instance.Modules()
-              .ConfigureIdentity(identity =>
-              {
-                  identity.ConfigureUser(user =>
-                  {
-                      user.AddOrUpdateProperty<string>( //property type: string
-                          "SocialSecurityNumber", //property name
-                          property =>
-                          {
-                              //validation rules
-                              property.Attributes.Add(new RequiredAttribute());
-                              property.Attributes.Add(new StringLengthAttribute(64) {MinimumLength = 4});
+                    ou.AddOrUpdateProperty<string>(
+                        CoreOracleConsts.OrganizationUnitSyncCode,
+                        property =>
+                        {
+                            property.Attributes.Add(
+                                new MaxLengthAttribute(
+                                    CoreOracleConsts.MaxOrganizationUnitSyncCodeLength
+                                )
+                            );
+                            property.DisplayName = L("OrganizationUnit:SyncCode");
+                        }
+                    );
 
-                              //...other configurations for this property
-                          }
-                      );
-                  });
-              });
+                    ou.AddOrUpdateProperty<OrganizationUnitTypeEnum>(
+                        CoreOracleConsts.OrganizationUnitType,
+                        property =>
+                        {
+                            property.DefaultValue = OrganizationUnitTypeEnum.Unit;
+                            property.DisplayName = L("OrganizationUnit:OrganizationUnitType");
+                        }
+                    );
+                });
+            });
+    }
 
-         * See the documentation for more:
-         * https://docs.abp.io/en/abp/latest/Module-Entity-Extensions
-         */
+    private static LocalizableString L(string name)
+    {
+        return LocalizableString.Create<CoreOracleResource>(name);
     }
 }

@@ -1,0 +1,20 @@
+@page
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Aqt.CoreOracle.Localization
+@using Aqt.CoreOracle.Web.Pages.OrganizationStructure
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
+@model EditModalModel
+@inject IHtmlLocalizer<CoreOracleResource> L
+@{ Layout = null; }
+
+<abp-dynamic-form abp-model="Input" asp-page="/OrganizationStructure/EditModal">
+    <abp-input asp-for="Id" type="hidden" />
+    <abp-modal>
+        <abp-modal-header title="@L["EditOrganizationUnit"].Value"></abp-modal-header>
+        <abp-modal-body>
+            <abp-form-content />
+        </abp-modal-body>
+        <abp-modal-footer buttons="@AbpModalButtons.Save | AbpModalButtons.Cancel"></abp-modal-footer>
+    </abp-modal>
+</abp-dynamic-form> 

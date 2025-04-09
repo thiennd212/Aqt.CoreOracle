@@ -1,0 +1,30 @@
+@page
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Aqt.CoreOracle.Localization
+@using Aqt.CoreOracle.Web.Pages.OrganizationStructure
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
+@model AssignPositionModalModel
+@inject IHtmlLocalizer<CoreOracleResource> L
+@{ Layout = null; }
+
+<form method="post" asp-page="/OrganizationStructure/AssignPositionModal">
+    <abp-modal>
+        <abp-modal-header title="@L["AssignPosition"].Value"></abp-modal-header>
+        <abp-modal-body>
+            <abp-input asp-for="OrganizationUnitId" type="hidden" />
+            
+            @* User Selection - Consider abp-lookup-input for large user bases *@
+            <abp-select asp-for="Input.UserId" asp-items="@Model.Users" label="@L["User"].Value" />
+            
+            <abp-select asp-for="Input.PositionId" asp-items="@Model.Positions" label="@L["Position"].Value" />
+            
+            <abp-input asp-for="Input.StartDate" type="date" />
+            <abp-input asp-for="Input.EndDate" type="date" />
+
+            <abp-validation-summary />
+            
+        </abp-modal-body>
+        <abp-modal-footer buttons="@AbpModalButtons.Save | AbpModalButtons.Cancel"></abp-modal-footer>
+    </abp-modal>
+</form> 

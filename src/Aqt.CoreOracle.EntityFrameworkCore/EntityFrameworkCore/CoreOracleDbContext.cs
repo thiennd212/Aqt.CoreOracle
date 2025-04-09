@@ -19,6 +19,9 @@ using Volo.Abp.OpenIddict.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection.Emit;
 using System.Linq;
+using Aqt.CoreOracle.Domain.Positions;
+using Aqt.CoreOracle.Domain.OrganizationStructure;
+using System.Reflection;
 
 namespace Aqt.CoreOracle.EntityFrameworkCore;
 
@@ -31,6 +34,8 @@ public class CoreOracleDbContext :
     IIdentityDbContext
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
+    public DbSet<Position> Positions { get; set; }
+    public DbSet<EmployeePosition> EmployeePositions { get; set; }
 
 
     #region Entities from the modules
@@ -117,6 +122,9 @@ public class CoreOracleDbContext :
         });
 
         /* Configure your own tables/entities inside here */
-        builder.ApplyConfigurations();
+        // Removed inline configurations for Position and EmployeePosition
+
+        // Apply all configurations from the current assembly
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

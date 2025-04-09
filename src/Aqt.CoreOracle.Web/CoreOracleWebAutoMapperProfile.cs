@@ -6,6 +6,7 @@ public class CoreOracleWebAutoMapperProfile : Profile
 {
     public CoreOracleWebAutoMapperProfile()
     {
-        //Define your object mappings here, for the Web project
+        // Define your global object mappings here, for the Web project (if any).
+        // Feature-specific mappings are moved to their respective Profile files.
     }
 }

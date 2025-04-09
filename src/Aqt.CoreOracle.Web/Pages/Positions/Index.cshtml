@@ -1,0 +1,56 @@
+@page
+@model Aqt.CoreOracle.Web.Pages.Positions.IndexModel
+@using Aqt.CoreOracle.Localization
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Button
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Card
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Table
+@using Aqt.CoreOracle.Web.Menus
+@using Aqt.CoreOracle.Permissions
+@using System.Text.Json;
+
+@inject IHtmlLocalizer<CoreOracleResource> L
+@inject IAuthorizationService AuthorizationService
+@inject IPageLayout PageLayout
+
+@{
+    PageLayout.Content.Title = L["Positions"].Value;
+    PageLayout.Content.BreadCrumb.Add(L["Menu:OrganizationManagement"].Value);
+    PageLayout.Content.BreadCrumb.Add(L["Menu:Positions"].Value);
+
+    // Serialize permissions model to JavaScript object
+    var permissionsJson = JsonSerializer.Serialize(Model.Permissions);
+}
+
+@section scripts {
+    <script>
+        // Define the permissions object in JavaScript scope
+        var pagePermissions = @Html.Raw(permissionsJson);
+    </script>
+    <abp-script src="/Pages/Positions/Index.js" />
+}
+
+<abp-card>
+    <abp-card-header>
+        <abp-row>
+            <abp-column size-md="_6">
+                <h2>@L["Positions"]</h2>
+            </abp-column>
+            <abp-column size-md="_6" class="text-end">
+                 @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.Positions.Create))
+                 {
+                    <abp-button id="NewPositionButton"
+                                text="@L["NewPosition"].Value"
+                                icon="plus"
+                                button-type="Primary" />
+                 }
+            </abp-column>
+        </abp-row>
+    </abp-card-header>
+    <abp-card-body>
+        <abp-table striped-rows="true" id="PositionsTable" class="nowrap"></abp-table>
+    </abp-card-body>
+</abp-card> 

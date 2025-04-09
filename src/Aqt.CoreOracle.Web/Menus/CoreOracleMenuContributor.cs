@@ -7,6 +7,10 @@ using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.Identity.Web.Navigation;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.TenantManagement.Web.Navigation;
+using Aqt.CoreOracle.Application;
+using Volo.Abp.Identity.Localization;
+using Volo.Abp.Identity.Web.Navigation;
+using System.Linq;
 
 namespace Aqt.CoreOracle.Web.Menus;
 
@@ -20,72 +24,74 @@ public class CoreOracleMenuContributor : IMenuContributor
         }
     }
 
-    private static Task ConfigureMainMenuAsync(MenuConfigurationContext context)
+    private async Task ConfigureMainMenuAsync(MenuConfigurationContext context)
     {
+        var administration = context.Menu.GetAdministration();
         var l = context.GetLocalizer<CoreOracleResource>();
 
-        //Home
-        context.Menu.AddItem(
-            new ApplicationMenuItem(
-                CoreOracleMenus.Home,
-                l["Menu:Home"],
-                "~/",
-                icon: "fa fa-home",
-                order: 1
-            )
-        );
+        context.Menu.Items.Insert(0, new ApplicationMenuItem(
+            CoreOracleMenus.Home,
+            l["Menu:Home"],
+            "~",
+            icon: "fas fa-home",
+            order: 0
+        ));
 
-        //Categories
-        var categoriesMenu = new ApplicationMenuItem(
-            "Categories",
-            l["Menu:Categories"],
-            icon: "fa fa-list",
-            order: 2
-        );
+        // Find Identity Management menu item
+        //var identityMenuItem = context.Menu.GetMenuItem(IdentityMenuNames.GroupName);
 
-        categoriesMenu.AddItem(
-            new ApplicationMenuItem(
-                "CategoryTypes",
-                l["Menu:CategoryTypes"],
-                url: "/Categories/CategoryTypes",
-                icon: "fa fa-folder",
-                requiredPermissionName: CoreOraclePermissions.CategoryTypes.Default
-            )
-        );
-
-        categoriesMenu.AddItem(
-            new ApplicationMenuItem(
-                "CategoryItems",
-                l["Menu:CategoryItems"],
-                url: "/Categories/CategoryItems",
-                icon: "fa fa-list-alt",
-                requiredPermissionName: CoreOraclePermissions.CategoryItems.Default
-            )
-        );
-
-        context.Menu.AddItem(categoriesMenu);
-
-        //Administration
-        var administration = context.Menu.GetAdministration();
-        administration.Order = 6;
-
-        //Administration->Identity
-        administration.SetSubItemOrder(IdentityMenuNames.GroupName, 1);
-    
-        if (MultiTenancyConsts.IsEnabled)
+        // Add Organization Management Submenu if user has permissions
+        if (await context.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.OrganizationUnits.Default) || // Or has default OU permission
+            await context.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.Positions.Default)) // Or has position permission
         {
-            administration.SetSubItemOrder(TenantManagementMenuNames.GroupName, 1);
-        }
-        else
-        {
-            administration.TryRemoveMenuItem(TenantManagementMenuNames.GroupName);
-        }
-        
-        administration.SetSubItemOrder(SettingManagementMenuNames.GroupName, 3);
+            var organizationManagementMenuItem = new ApplicationMenuItem(
+                CoreOracleMenus.OrganizationManagement.GroupName,
+                l["Menu:OrganizationManagement"],
+                icon: "fas fa-sitemap"
+                //order: identityMenuItem?.Order + 1 ?? 1 // Place it after Identity Management
+            );
+            context.Menu.AddItem(organizationManagementMenuItem);
 
-        //Administration->Settings
-        administration.SetSubItemOrder(SettingManagementMenuNames.GroupName, 7);
-        
-        return Task.CompletedTask;
+            // Add Positions menu item if user has permission
+            if (await context.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.Positions.Default))
+            {
+                organizationManagementMenuItem.AddItem(new ApplicationMenuItem(
+                    CoreOracleMenus.OrganizationManagement.Positions,
+                    l["Menu:Positions"],
+                    url: "/Positions",
+                    icon: "fas fa-id-badge",
+                    requiredPermissionName: CoreOraclePermissions.OrganizationManagement.Positions.Default
+                ));
+            }
+
+            // Add Organization Structure menu item if user has the correct permission
+            if (await context.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.OrganizationUnits.Default))
+            {
+                organizationManagementMenuItem.AddItem(new ApplicationMenuItem(
+                    CoreOracleMenus.OrganizationManagement.OrganizationStructure, // Assuming this constant exists
+                    l["Menu:OrganizationStructure"],
+                    url: "/OrganizationStructure", // Points to the new page
+                    icon: "fas fa-network-wired",
+                    requiredPermissionName: CoreOraclePermissions.OrganizationManagement.OrganizationUnits.Default // Use correct permission
+                ));
+            }
+        }
+
+        if (administration != null)
+        {
+            // Remove Identity Management from Administration if we added the custom group
+            //if (identityMenuItem != null && context.Menu.Items.Any(x => x.Name == CoreOracleMenus.OrganizationManagement.GroupName))
+            //{
+            //    administration.Items.Remove(identityMenuItem);
+            //}
+            // Move Tenant Management if needed
+            var tenantManagementMenuItem = administration.GetMenuItem(TenantManagementMenuNames.GroupName);
+            if (tenantManagementMenuItem != null)
+            {
+                administration.Items.Remove(tenantManagementMenuItem);
+                // Optionally add it back to the main menu or a different group
+                // context.Menu.AddItem(tenantManagementMenuItem);
+            }
+        }
     }
 }

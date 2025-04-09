@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
+using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using Volo.Abp.MultiTenancy;
 using Aqt.CoreOracle.MultiTenancy;
@@ -24,17 +25,20 @@ public class CoreOracleDbMigrationService : ITransientDependency
     private readonly IEnumerable<ICoreOracleDbSchemaMigrator> _dbSchemaMigrators;
     private readonly ITenantRepository _tenantRepository;
     private readonly ICurrentTenant _currentTenant;
+    private readonly IGuidGenerator _guidGenerator;
 
     public CoreOracleDbMigrationService(
         IDataSeeder dataSeeder,
+        IEnumerable<ICoreOracleDbSchemaMigrator> dbSchemaMigrators,
         ITenantRepository tenantRepository,
         ICurrentTenant currentTenant,
-        IEnumerable<ICoreOracleDbSchemaMigrator> dbSchemaMigrators)
+        IGuidGenerator guidGenerator)
     {
         _dataSeeder = dataSeeder;
+        _dbSchemaMigrators = dbSchemaMigrators;
         _tenantRepository = tenantRepository;
         _currentTenant = currentTenant;
-        _dbSchemaMigrators = dbSchemaMigrators;
+        _guidGenerator = guidGenerator;
 
         Logger = NullLogger<CoreOracleDbMigrationService>.Instance;
     }
@@ -67,15 +71,17 @@ public class CoreOracleDbMigrationService : ITransientDependency
                 {
                     if (tenant.ConnectionStrings.Any())
                     {
-                        var tenantConnectionStrings = tenant.ConnectionStrings
+                        var databaseName = tenant.ConnectionStrings
                             .Select(x => x.Value)
-                            .ToList();
+                            .FirstOrDefault()? // Takes the value of the first connection string
+                            .Split(';') // Assuming connection strings are separated by ';'
+                            .FirstOrDefault(s => s.StartsWith("Data Source="))?
+                            .Substring("Data Source=".Length); // Extracts database name
 
-                        if (!migratedDatabaseSchemas.IsSupersetOf(tenantConnectionStrings))
+                        if (databaseName != null && !migratedDatabaseSchemas.Contains(databaseName))
                         {
                             await MigrateDatabaseSchemaAsync(tenant);
-
-                            migratedDatabaseSchemas.AddIfNotContains(tenantConnectionStrings);
+                            migratedDatabaseSchemas.Add(databaseName);
                         }
                     }
 
@@ -106,10 +112,8 @@ public class CoreOracleDbMigrationService : ITransientDependency
         Logger.LogInformation($"Executing {(tenant == null ? "host" : tenant.Name + " tenant")} database seed...");
         
         await _dataSeeder.SeedAsync(new DataSeedContext(tenant?.Id)
-            .WithProperty(IdentityDataSeedContributor.AdminEmailPropertyName,
-                CoreOracleConsts.AdminEmailDefaultValue)
-            .WithProperty(IdentityDataSeedContributor.AdminPasswordPropertyName,
-                CoreOracleConsts.AdminPasswordDefaultValue)
+            .WithProperty("AdminEmail", IdentityDataSeedContributor.AdminEmailDefaultValue)
+            .WithProperty("AdminPassword", IdentityDataSeedContributor.AdminPasswordDefaultValue)
         );
     }
 

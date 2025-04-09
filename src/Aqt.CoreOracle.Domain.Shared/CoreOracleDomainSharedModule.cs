@@ -13,6 +13,7 @@ using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.OpenIddict;
 using Volo.Abp.BlobStoring.Database;
 using Volo.Abp.TenantManagement;
+using Aqt.CoreOracle.Domain.Shared;
 
 namespace Aqt.CoreOracle;
 
@@ -48,6 +49,8 @@ public class CoreOracleDomainSharedModule : AbpModule
                 .Add<CoreOracleResource>("en")
                 .AddBaseTypes(typeof(AbpValidationResource))
                 .AddVirtualJson("/Localization/CoreOracle");
+
+            options.Languages.Add(new LanguageInfo("vi", "vi", "Tiếng Việt"));
 
             options.DefaultResourceType = typeof(CoreOracleResource);
         });

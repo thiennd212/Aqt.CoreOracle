@@ -1,0 +1,21 @@
+@page
+@model Aqt.CoreOracle.Web.Pages.Positions.EditModalModel
+@using Aqt.CoreOracle.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
+@{ Layout = null; }
+
+@inject IHtmlLocalizer<CoreOracleResource> L
+
+<abp-dynamic-form abp-model="Input" asp-page="/Positions/EditModal">
+    <abp-modal>
+        <abp-modal-header title="@L["EditPosition"].Value"></abp-modal-header>
+        <abp-modal-body>
+            <abp-input asp-for="Input.Id" /> @* Ensure the Id is included in the form *@
+            <abp-form-content />
+        </abp-modal-body>
+        <abp-modal-footer buttons="@(AbpModalButtons.Save | AbpModalButtons.Cancel)"></abp-modal-footer>
+    </abp-modal>
+</abp-dynamic-form> 

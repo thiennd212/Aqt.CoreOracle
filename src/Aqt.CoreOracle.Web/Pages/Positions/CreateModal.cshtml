@@ -1,0 +1,20 @@
+@page
+@model Aqt.CoreOracle.Web.Pages.Positions.CreateModalModel
+@using Aqt.CoreOracle.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
+@{ Layout = null; }
+
+@inject IHtmlLocalizer<CoreOracleResource> L
+
+<abp-dynamic-form abp-model="Input" asp-page="/Positions/CreateModal">
+    <abp-modal>
+        <abp-modal-header title="@L["NewPosition"].Value"></abp-modal-header>
+        <abp-modal-body>
+            <abp-form-content />
+        </abp-modal-body>
+        <abp-modal-footer buttons="@(AbpModalButtons.Save | AbpModalButtons.Cancel)"></abp-modal-footer>
+    </abp-modal>
+</abp-dynamic-form>
