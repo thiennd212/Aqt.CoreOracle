@@ -46,10 +46,11 @@ public class CoreOracleDomainSharedModule : AbpModule
         Configure<AbpLocalizationOptions>(options =>
         {
             options.Resources
-                .Add<CoreOracleResource>("en")
+                .Add<CoreOracleResource>(defaultCultureName: "vi")
                 .AddBaseTypes(typeof(AbpValidationResource))
                 .AddVirtualJson("/Localization/CoreOracle");
 
+            options.Languages.Add(new LanguageInfo("en", "en", "English"));
             options.Languages.Add(new LanguageInfo("vi", "vi", "Tiếng Việt"));
 
             options.DefaultResourceType = typeof(CoreOracleResource);

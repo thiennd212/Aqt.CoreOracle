@@ -48,5 +48,6 @@
     "SelectAnOrganizationUnitFirst": "Vui lòng chọn một đơn vị/phòng ban trước.",
     "ErrorLoadingOrganizationUnitDetails": "Không thể tải chi tiết đơn vị/phòng ban.",
     "NewRootOU": "Thêm Đơn vị/Phòng ban gốc"
+
   }
-} 
+}

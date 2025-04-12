@@ -1,4 +1,5 @@
 @page
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Aqt.CoreOracle.Localization
@@ -7,8 +8,10 @@
 @model IndexModel
 @inject IHtmlLocalizer<CoreOracleResource> L
 @inject IAuthorizationService AuthorizationService
+@inject IPageLayout PageLayout
 @{
-    ViewBag.Title = L["Menu:OrganizationStructure"].Value;
+    PageLayout.Content.Title = L["Menu:OrganizationStructure"].Value;
+    PageLayout.Content.BreadCrumb.Add(L["Menu:OrganizationManagement"].Value);
 }
 
 @section styles {

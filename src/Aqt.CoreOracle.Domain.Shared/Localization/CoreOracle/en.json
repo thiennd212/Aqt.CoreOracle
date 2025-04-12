@@ -48,5 +48,6 @@
     "SelectAnOrganizationUnitFirst": "Please select an organization unit first.",
     "ErrorLoadingOrganizationUnitDetails": "Could not load organization unit details.",
     "NewRootOU": "New Root Unit/Department"
+
   }
 }

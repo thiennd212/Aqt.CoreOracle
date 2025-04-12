@@ -1,0 +1,155 @@
+---
+description: 
+globs: **/Aqt.CoreOracle.EntityFrameworkCore/**/*.cs
+alwaysApply: false
+---
+# Rule: Chuẩn hóa tầng Aqt.CoreOracle.EntityFrameworkCore
+
+## Context
+
+Tầng `EntityFrameworkCore` là nơi định nghĩa DbContext, cấu hình mapping và implement Repository.  
+Đây là cầu nối giữa tầng Domain và Database, dùng để hiện thực hóa hợp đồng Repository đã khai báo ở `Domain`.
+
+## Requirements
+
+### 📁 Cấu trúc thư mục
+
+- ✅ Theo module: `Orders/OrderRepository.cs`, `Customers/CustomerRepository.cs`
+- ✅ Chứa mapping tại `EntityFrameworkCore/EntityTypeConfigurations/`
+- ❌ Không nên chứa Entity, AppService, logic nghiệp vụ
+
+### 📦 Namespace
+
+- ✅ `Aqt.CoreOracle.EntityFrameworkCore.[Module]`
+- ❌ Không dùng `Application`, `Domain`, `Web`
+
+### 🧩 DbContext
+
+- ✅ DbContext kế thừa từ `AbpDbContext<CoreOracleDbContext>`
+- ✅ Khai báo `DbSet<T>` theo từng Entity
+- ✅ Override `OnModelCreating` để configure entity nếu cần
+
+📌 Ví dụ:
+```csharp
+public class CoreOracleDbContext : AbpDbContext<CoreOracleDbContext>
+{
+    public DbSet<Order> Orders { get; set; }
+
+    public CoreOracleDbContext(DbContextOptions<CoreOracleDbContext> options)
+        : base(options) {}
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.ConfigureCoreOracle(); // Extension method cho module này
+    }
+}
+```
+
+### 🗃️ Repository Implementation
+
+- ✅ Repository implement từ interface ở Domain (VD: `IOrderRepository`)
+- ✅ Kế thừa `EfCoreRepository<DbContext, Entity, Key>`
+- ✅ Đặt tại module tương ứng trong EntityFrameworkCore
+
+📌 Ví dụ:
+```csharp
+public class OrderRepository : EfCoreRepository<CoreOracleDbContext, Order, Guid>, IOrderRepository
+{
+    public OrderRepository(IDbContextProvider<CoreOracleDbContext> dbContextProvider)
+        : base(dbContextProvider)
+    {
+    }
+
+    public Task<List<Order>> GetRecentAsync(int count)
+    {
+        return (await GetDbSetAsync())
+            .OrderByDescending(x => x.CreationTime)
+            .Take(count)
+            .ToListAsync();
+    }
+}
+```
+
+### 🧩 Entity Mapping
+
+- ✅ Tách riêng file mapping nếu entity có cấu hình phức tạp
+- ✅ Dùng Fluent API trong `Configure<Entity>(...)`
+- ✅ Extension method `ModelBuilder.ConfigureCoreOracle()` nên gọi tại `OnModelCreating`
+
+📌 Ví dụ:
+```csharp
+public static class CoreOracleDbContextModelCreatingExtensions
+{
+    public static void ConfigureCoreOracle(this ModelBuilder builder)
+    {
+        builder.Entity<Order>(b =>
+        {
+            b.ToTable("Orders", "app");
+            b.ConfigureByConvention();
+            b.Property(x => x.Code).IsRequired().HasMaxLength(64);
+        });
+    }
+}
+```
+
+### 🧾 Using đúng namespace
+
+Cần `using` đúng các namespace sau để truy cập Setting, Localization
+
+| Loại dữ liệu          | Namespace mẫu                                               |
+|-----------------------|-------------------------------------------------------------|
+| Setting name constant | `Aqt.CoreOracle.Settings`                                   |
+| Localization Resource | `Aqt.CoreOracle.Localization`                               |
+
+📌 Ví dụ:
+```csharp
+using Aqt.CoreOracle.Permissions;
+using Aqt.CoreOracle.Settings;
+using Aqt.CoreOracle.Localization;
+```
+
+## Examples
+
+### ✅ Ví dụ đúng
+
+```csharp
+// 🧩 DbContext đúng chuẩn ABP
+public class CoreOracleDbContext : AbpDbContext<CoreOracleDbContext>
+{
+    public DbSet<Order> Orders { get; set; }
+
+    public CoreOracleDbContext(DbContextOptions<CoreOracleDbContext> options)
+        : base(options) {}
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.ConfigureCoreOracle();
+    }
+}
+```
+
+```csharp
+// 🗃️ Repository implement đúng chuẩn
+public class OrderRepository : EfCoreRepository<CoreOracleDbContext, Order, Guid>, IOrderRepository
+{
+    public OrderRepository(IDbContextProvider<CoreOracleDbContext> provider) : base(provider) { }
+}
+```
+
+### ❌ Ví dụ sai
+
+```csharp
+// ❌ Không kế thừa AbpDbContext
+public class BadDbContext : DbContext
+{
+    public DbSet<Order> Orders { get; set; }
+}
+
+// ❌ Repository không implement interface
+public class OrderRepo
+{
+    // thiếu kế thừa từ EfCoreRepository, sai chuẩn
+}
+```

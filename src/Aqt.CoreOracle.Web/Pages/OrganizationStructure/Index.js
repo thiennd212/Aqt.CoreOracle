@@ -68,8 +68,8 @@ $(function () {
                 data: function (node, cb) {
                     ouService.getOrganizationTree().then(function (result) {
                         // Map dữ liệu bên trong function này
-                        console.log(result.items);
                         var jstreeData = flatten(result.items); // Flatten toàn bộ cây
+                        console.log('jstreeData:', jstreeData);
                         // Gọi callback của jsTree với dữ liệu đã map
                         cb(jstreeData);
                     }).catch(function(error) {
@@ -81,9 +81,7 @@ $(function () {
                 },
                 check_callback: true, // Cho phép các thao tác khác như tạo, sửa, xóa (nếu dùng plugin tương ứng)
                 themes: {
-                    name: 'default', // <- thêm dòng này để chắc chắn jsTree dùng theme hỗ trợ line
                     responsive: true,
-                    stripes: true,
                     dots: true
                 }
             },
@@ -93,7 +91,7 @@ $(function () {
                 }
                 // Bạn có thể định nghĩa thêm types nếu muốn icon khác nhau
             },
-            plugins: ['types', 'wholerow', 'themes'] // Giữ các plugin cần thiết
+            plugins: ['types', 'themes'] // Giữ các plugin cần thiết
         });
 
         // Xử lý sự kiện chọn node (giữ nguyên)
@@ -118,8 +116,20 @@ $(function () {
          // Các sự kiện khác của jsTree như loaded.jstree, refresh.jstree có thể được thêm ở đây nếu cần
          $tree.on('loaded.jstree', function() {
              // Có thể thực hiện hành động gì đó sau khi cây tải xong lần đầu
-             console.log('jsTree loaded initial data.');
+             console.log('jsTree loaded initial data.');            
+            
          });
+
+         $tree.on('ready.jstree', function () {
+            console.log('jsTree is fully ready');
+        
+            // Remove jstree-no-dots from all matching ul
+            $('#OrganizationUnitTree ul.jstree-container-ul').removeClass('jstree-no-dots');
+            $('#OrganizationUnitTree').jstree('open_node', '#'); // mở root
+            $('#OrganizationUnitTree').find('li[aria-level="2"]').each(function () {
+                $('#OrganizationUnitTree').jstree('open_node', this.id);
+            });
+        });
 
          $tree.on('refresh.jstree', function() {
              // Có thể thực hiện hành động gì đó sau mỗi lần refresh
