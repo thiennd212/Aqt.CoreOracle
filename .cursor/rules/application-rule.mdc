@@ -71,6 +71,53 @@ public class ProductAppService : CrudAppService<Product, ProductDto, Guid>, IPro
 - ❌ Không thao tác trực tiếp với DbContext
 - ❌ Không raise Domain Event (phải raise từ Entity hoặc Domain)
 
+### 🧭 Cấu hình AutoMapper Profile
+#### 🛠️ Sử dụng `.ForMember(...)` nếu cần ánh xạ đặc biệt
+
+Nếu field trong DTO và Entity không trùng tên, hoặc cần xử lý tùy biến khi map, dùng `.ForMember(...)` để định nghĩa rõ.
+
+📌 Ví dụ:
+```csharp
+CreateMap<Order, OrderDto>()
+    .ForMember(dest => dest.TotalText, opt => opt.MapFrom(src => src.Total.ToString("C0")));
+
+CreateMap<CreateUpdateOrderDto, Order>()
+    .ForMember(dest => dest.Status, opt => opt.Ignore()); // bỏ qua trường không cần map
+```
+
+> ✅ `.ForMember` là cách tốt nhất để custom mapping chính xác trong AutoMapper profile.
+
+
+Để ánh xạ DTO ↔ Entity một cách tự động, bạn nên tạo class cấu hình AutoMapper profile riêng cho từng module.
+
+#### ✅ Quy tắc:
+- ✅ Mỗi module nên có một profile riêng: `OrderApplicationAutoMapperProfile`
+- ✅ Kế thừa từ `Profile` (AutoMapper) hoặc `AutoMapperProfileBase` (nếu dùng base ABP)
+- ✅ Đăng ký trong `ApplicationModule` qua `AddAutoMapperObjectMapper`
+- ❌ Không khai báo mapping trong AppService trực tiếp
+
+📌 Ví dụ:
+
+```csharp
+public class OrderApplicationAutoMapperProfile : Profile
+{
+    public OrderApplicationAutoMapperProfile()
+    {
+        CreateMap<Order, OrderDto>();
+        CreateMap<CreateUpdateOrderDto, Order>();
+    }
+}
+```
+
+📌 Trong `AqtCoreOracleApplicationModule.cs`:
+```csharp
+context.Services.AddAutoMapperObjectMapper<AqtCoreOracleApplicationModule>();
+Configure<AbpAutoMapperOptions>(options =>
+{
+    options.AddMaps<AqtCoreOracleApplicationModule>();
+});
+```
+
 ### 📤 Kết nối tầng ngoài
 
 - ✅ Dùng AutoMapper để map DTO <-> Entity

@@ -33,6 +33,7 @@ Tầng này có thể dùng để giao tiếp với Application layer hoặc Htt
 
 ### 🧩 Menu & Navigation
 
+- ✅ Tạo và cấu hình menu trong `Menus/CoreOracleMenus.cs` và `Menus/CoreOracleMenuContributor.cs`
 - ✅ Sử dụng `IMenuContributor` để thêm mục menu
 - ✅ Sử dụng localization cho label menu (`L["Orders"]`)
 - ✅ Group menu theo module

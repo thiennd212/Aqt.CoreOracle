@@ -72,6 +72,41 @@ public class OrderRepository : EfCoreRepository<CoreOracleDbContext, Order, Guid
 ```
 
 ### 🧩 Entity Mapping
+---
+
+### 🗂️ EntityTypeConfiguration tách riêng
+
+ABP cho phép bạn cấu hình entity bằng Fluent API theo 2 cách:
+
+1. Cấu hình trực tiếp trong `CoreOracleDbContextModelCreatingExtensions` (chỉ nên dùng cho cấu hình chung, đơn giản)
+2. ✅ **Khuyến nghị:** tạo class riêng implement `IEntityTypeConfiguration<TEntity>` cho từng entity → tách biệt, dễ maintain, rõ vai trò.
+
+#### ✅ Quy tắc:
+- ✅ Mỗi entity nên có một file riêng kế thừa `IEntityTypeConfiguration<T>`
+- ✅ Đặt trong thư mục `EntityFrameworkCore/Configurations/`
+- ✅ Đăng ký bằng `builder.ApplyConfiguration(new OrderConfiguration());` trong `CoreOracleDbContextModelCreatingExtensions`
+
+📌 Ví dụ:
+
+```csharp
+public class OrderConfiguration : IEntityTypeConfiguration<Order>
+{
+    public void Configure(EntityTypeBuilder<Order> builder)
+    {
+        builder.ToTable("Orders", "app");
+        builder.ConfigureByConvention();
+        builder.Property(x => x.Code).IsRequired().HasMaxLength(64);
+    }
+}
+```
+
+📌 Trong `CoreOracleDbContextModelCreatingExtensions.cs`:
+```csharp
+builder.ApplyConfiguration(new OrderConfiguration());
+```
+
+> ❌ Không nên dồn toàn bộ cấu hình của từng entity vào 1 file extension lớn, gây khó bảo trì.
+
 
 - ✅ Tách riêng file mapping nếu entity có cấu hình phức tạp
 - ✅ Dùng Fluent API trong `Configure<Entity>(...)`
