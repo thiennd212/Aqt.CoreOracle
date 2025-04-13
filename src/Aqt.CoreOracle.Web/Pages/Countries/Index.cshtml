@@ -1,0 +1,34 @@
+@page
+@using Aqt.CoreOracle.Permissions
+@using Microsoft.AspNetCore.Authorization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@using Aqt.CoreOracle.Web.Pages.Countries
+@using Aqt.CoreOracle.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@model IndexModel
+@inject IHtmlLocalizer<CoreOracleResource> L
+@inject IAuthorizationService AuthorizationService
+@inject IPageLayout PageLayout
+@{
+    PageLayout.Content.Title = L["Countries"].Value;
+}
+
+@section scripts {
+    <abp-script src="/Pages/Countries/index.js" />
+}
+
+@section content_toolbar {
+    @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.Countries.Create))
+    {
+        <abp-button id="NewCountryButton"
+                    text="@L["NewCountry"].Value"
+                    icon="plus"
+                    button-type="Primary" />
+    }
+}
+
+<abp-card>
+    <abp-card-body>
+        <abp-table striped-rows="true" id="CountriesTable"></abp-table>
+    </abp-card-body>
+</abp-card> 

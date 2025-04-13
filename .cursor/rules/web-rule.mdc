@@ -31,6 +31,10 @@ Tầng này có thể dùng để giao tiếp với Application layer hoặc Htt
 - ✅ Dùng service được inject (`AppService`) để gọi dữ liệu
 - ❌ Không gọi trực tiếp `DbContext` hoặc `Repository`
 
+### Tag Helpers
+- ✅ Sử dụng các Tag Helper có sẵn của ABP (như `<abp-button>`, `<abp-table>`, `<abp-modal>`, `<abp-dynamic-form>`, etc.) để xây dựng UI nhanh chóng và nhất quán.
+- **Lưu ý `<abp-button>`:** Thuộc tính `button-type` dùng để chỉ định *kiểu dáng* (Primary, Secondary, Success, Danger, etc.), không phải hành động. Hành động "submit" (như tìm kiếm, lưu form) thường được xử lý bằng JavaScript riêng hoặc là hành vi mặc định của form. **Không sử dụng `button-type="Submit"`**. Thay vào đó, hãy dùng các giá trị như `Primary` và xử lý logic submit trong code JavaScript hoặc để form tự xử lý.
+
 ### 🧩 Menu & Navigation
 
 - ✅ Tạo và cấu hình menu trong `Menus/CoreOracleMenus.cs` và `Menus/CoreOracleMenuContributor.cs`
@@ -151,6 +155,21 @@ public class CreateUpdateOrderDto
 
 > 🧠 Dynamic form giúp giảm lặp lại, nhưng không thay thế được form viết tay trong các case đặc biệt.
 
+#### 6Khi nào sử dụng ViewModel và khi nào dùng DTO trực tiếp?
+
+Việc quyết định sử dụng DTO trực tiếp hay tạo ViewModel riêng trong PageModel phụ thuộc vào độ phức tạp của giao diện và sự khác biệt giữa dữ liệu UI cần và DTO ở tầng Contracts.
+
+**Khi nào nên dùng trực tiếp DTO:**
+- Form đơn giản, ánh xạ 1:1 với DTO.
+- Chỉ hiển thị dữ liệu DTO, không cần định dạng/tính toán phức tạp.
+- Không cần các cấu hình UI đặc thù (như `[SelectItems]`, `[TextArea]`) đặt trên thuộc tính của Model.
+- Ít logic hiển thị.
+
+**Khi nào nên tạo ViewModel (trong tầng Web):**
+- **Cần cấu hình UI trên Model:** Khi cần dùng các attribute như `[SelectItems]`, `[TextArea]`, `[DatePickerOptions]` để `<abp-form-content />` tự động render đúng control. ViewModel cho phép đặt các attribute này mà không vi phạm kiến trúc tầng (vì ViewModel và PageModel cùng ở tầng Web).
+- **Dữ liệu hiển thị khác biệt:** Cần kết hợp dữ liệu từ nhiều nguồn, cần định dạng/tính toán riêng cho UI, cấu trúc dữ liệu View cần khác DTO.
+- **Cần cấu trúc dữ liệu hỗ trợ UI:** ViewModel có thể chứa các `List<SelectListItem>` hoặc cấu trúc khác cho dropdown, radio list...
+- **Form phức tạp:** Nhiều logic, validation phức tạp, hoặc các trường không ánh xạ 1:1 với DTO.
 
 ### 🧩 Partial / Tag Helpers tùy chỉnh
 
@@ -231,7 +250,6 @@ public class EditModel : CoreOraclePageModel
     }
 }
 ```
-
 
 ## Examples
 

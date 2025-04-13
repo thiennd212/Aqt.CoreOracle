@@ -18,4 +18,7 @@ public static class CoreOracleDomainErrorCodes
     public const string PositionNotFound = "CoreOracle:00003";
     public const string OrganizationUnitNotFound = "CoreOracle:00004";
     public const string InvalidPositionAssignmentDateRange = "CoreOracle:00005";
+    public const string CountryCodeAlreadyExists = "CoreOracle:00011";
+    public const string ProvinceCodeAlreadyExistsInCountry = "CoreOracle:00021";
+    public const string CountryNotFoundForProvince = "CoreOracle:00022";
 }

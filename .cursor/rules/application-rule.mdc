@@ -92,9 +92,11 @@ CreateMap<CreateUpdateOrderDto, Order>()
 
 #### ✅ Quy tắc:
 - ✅ Mỗi module nên có một profile riêng: `OrderApplicationAutoMapperProfile`
+- ✅ Using `Volo.Abp.AutoMapper` cho `OrderApplicationAutoMapperProfile` 
 - ✅ Kế thừa từ `Profile` (AutoMapper) hoặc `AutoMapperProfileBase` (nếu dùng base ABP)
 - ✅ Đăng ký trong `ApplicationModule` qua `AddAutoMapperObjectMapper`
 - ❌ Không khai báo mapping trong AppService trực tiếp
+- ❌ Không cập nhật mapping trong `CoreOracleApplicationAutoMapperProfile`
 
 📌 Ví dụ:
 

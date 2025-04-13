@@ -22,6 +22,9 @@ using System.Linq;
 using Aqt.CoreOracle.Domain.Positions;
 using Aqt.CoreOracle.Domain.OrganizationStructure;
 using System.Reflection;
+using Aqt.CoreOracle.Domain.Countries.Entities;
+using Aqt.CoreOracle.Domain.Provinces.Entities;
+using Aqt.CoreOracle.EntityFrameworkCore.EntityTypeConfigurations.Provinces;
 
 namespace Aqt.CoreOracle.EntityFrameworkCore;
 
@@ -36,6 +39,8 @@ public class CoreOracleDbContext :
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Position> Positions { get; set; }
     public DbSet<EmployeePosition> EmployeePositions { get; set; }
+    public DbSet<Country> Countries { get; set; }
+    public DbSet<Province> Provinces { get; set; }
 
 
     #region Entities from the modules

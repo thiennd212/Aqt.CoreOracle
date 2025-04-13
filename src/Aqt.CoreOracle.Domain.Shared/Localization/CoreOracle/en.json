@@ -47,7 +47,31 @@
     "OrganizationUnitDeletionConfirmationMessage": "Are you sure you want to delete the unit/department '{0}' and all its members/sub-units?",
     "SelectAnOrganizationUnitFirst": "Please select an organization unit first.",
     "ErrorLoadingOrganizationUnitDetails": "Could not load organization unit details.",
-    "NewRootOU": "New Root Unit/Department"
-
+    "NewRootOU": "New Root Unit/Department",
+    "Menu:Countries": "Countries",
+    "Countries": "Countries",
+    "NewCountry": "New Country",
+    "EditCountry": "Edit Country",
+    "CountryCode": "Code",
+    "CountryName": "Name",
+    "AreYouSure": "Are you sure?",
+    "AreYouSureToDelete": "Are you sure you want to delete this item: {0}?",
+    "Permission:Countries": "Country Management",
+    "Permission:Edit": "Edit",
+    "Menu:Provinces": "Provinces/Cities",
+    "Provinces": "Provinces/Cities",
+    "NewProvince": "New Province/City",
+    "EditProvince": "Edit Province/City",
+    "ProvinceCode": "Code",
+    "ProvinceName": "Name",
+    "ProvinceCountry": "Country",
+    "SelectCountry": "Select Country",
+    "AreYouSureToDeleteProvince": "Are you sure you want to delete this province/city: {0}?",
+    "Permission:Provinces": "Province/City Management",
+    "Permission:Provinces.Create": "Create Province/City",
+    "Permission:Provinces.Edit": "Edit Province/City",
+    "Permission:Provinces.Delete": "Delete Province/City",
+    "ProvinceCodeAlreadyExistsInCountry": "The province/city code '{0}' already exists in the selected country.",
+    "CountryNotFoundForProvince": "Country not found for this province/city."
   }
 }

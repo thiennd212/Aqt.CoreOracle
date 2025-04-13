@@ -1,0 +1,60 @@
+@page
+@using Aqt.CoreOracle.Permissions
+@using Microsoft.AspNetCore.Authorization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@using Aqt.CoreOracle.Web.Pages.Provinces
+@using Aqt.CoreOracle.Localization
+@using Microsoft.Extensions.Localization
+@model IndexModel
+@inject IStringLocalizer<CoreOracleResource> L
+@inject IAuthorizationService AuthorizationService
+@inject IPageLayout PageLayout
+@{
+    PageLayout.Content.Title = L["Provinces"].Value;
+}
+
+@section scripts {
+    <abp-script src="/Pages/Provinces/index.js" />
+}
+
+@section content_toolbar {
+    @if (await AuthorizationService.IsGrantedAsync(CoreOraclePermissions.Provinces.Create))
+    {
+        <abp-button id="NewProvinceButton"
+                    text="@L["NewProvince"].Value"
+                    icon="plus"
+                    button-type="Primary" />
+    }
+}
+
+<abp-card>
+    <abp-card-body>
+        <abp-row class="mb-3">
+            <abp-column size-md="_4">
+                <label class="form-label">@L["ProvinceCountry"]</label>
+                <select name="CountryIdFilter" id="CountryIdFilter" class="form-select">
+                    @if (Model.CountryLookup != null)
+                    {
+                        foreach (var item in Model.CountryLookup)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                </select>
+            </abp-column>
+            <abp-column size-md="_4">
+                <label class="form-label">@L["Search"]</label>
+                <input type="text" id="SearchFilter" class="form-control" />
+            </abp-column>
+            <abp-column size-md="_4" class="text-end">
+                 <abp-button id="SearchButton"
+                           text="@L["Search"].Value"
+                           icon="search"
+                           button-type="Primary"
+                           class="mt-4"/>
+            </abp-column>
+        </abp-row>
+
+        <abp-table striped-rows="true" id="ProvincesTable"></abp-table>
+    </abp-card-body>
+</abp-card> 

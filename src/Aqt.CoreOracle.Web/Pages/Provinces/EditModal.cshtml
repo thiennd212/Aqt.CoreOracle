@@ -1,0 +1,29 @@
+@page "/Provinces/EditModal"
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal
+@using Aqt.CoreOracle.Localization
+@using Aqt.CoreOracle.Web.Pages.Provinces
+@model EditModalModel
+@inject IHtmlLocalizer<CoreOracleResource> L
+@{
+    Layout = null;
+}
+<abp-dynamic-form abp-model="Province" asp-page="/Provinces/EditModal">
+    <abp-modal>
+        <abp-modal-header title="@L["EditProvince"].Value"></abp-modal-header>
+        <abp-modal-body>
+            <input type="hidden" asp-for="Id" />
+            <abp-select asp-for="Province.CountryId"
+                       label="@L["ProvinceCountry"].Value"
+                       asp-items="Model.CountryLookup"
+                       required/>
+            <abp-input asp-for="Province.Code"
+                      label="@L["ProvinceCode"].Value"
+                      required/>
+            <abp-input asp-for="Province.Name"
+                      label="@L["ProvinceName"].Value"
+                      required/>
+        </abp-modal-body>
+        <abp-modal-footer buttons="@(AbpModalButtons.Cancel | AbpModalButtons.Save)"></abp-modal-footer>
+    </abp-modal>
+</abp-dynamic-form> 

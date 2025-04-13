@@ -9,7 +9,6 @@ using Volo.Abp.UI.Navigation;
 using Volo.Abp.TenantManagement.Web.Navigation;
 using Aqt.CoreOracle.Application;
 using Volo.Abp.Identity.Localization;
-using Volo.Abp.Identity.Web.Navigation;
 using System.Linq;
 
 namespace Aqt.CoreOracle.Web.Menus;
@@ -32,13 +31,34 @@ public class CoreOracleMenuContributor : IMenuContributor
         context.Menu.Items.Insert(0, new ApplicationMenuItem(
             CoreOracleMenus.Home,
             l["Menu:Home"],
-            "~",
+            "~/",
             icon: "fas fa-home",
             order: 0
         ));
 
-        // Find Identity Management menu item
-        //var identityMenuItem = context.Menu.GetMenuItem(IdentityMenuNames.GroupName);
+        // Add Countries menu item if user has default permission
+        if (await context.IsGrantedAsync(CoreOraclePermissions.Countries.Default))
+        {
+            context.Menu.AddItem(new ApplicationMenuItem(
+                CoreOracleMenus.Countries,
+                l["Menu:Countries"],
+                "/Countries",
+                icon: "fas fa-globe",
+                order: 1
+            ).RequirePermissions(CoreOraclePermissions.Countries.Default));
+        }
+
+        // Add Province/City Management menu item if user has default permission
+        if (await context.IsGrantedAsync(CoreOraclePermissions.Provinces.Default))
+        {
+            context.Menu.AddItem(new ApplicationMenuItem(
+                CoreOracleMenus.Provinces,
+                l["Menu:Provinces"],
+                "/Provinces",
+                icon: "fas fa-city",
+                order: 2
+            ).RequirePermissions(CoreOraclePermissions.Provinces.Default));
+        }
 
         // Add Organization Management Submenu if user has permissions
         if (await context.IsGrantedAsync(CoreOraclePermissions.OrganizationManagement.OrganizationUnits.Default) || // Or has default OU permission
@@ -47,8 +67,8 @@ public class CoreOracleMenuContributor : IMenuContributor
             var organizationManagementMenuItem = new ApplicationMenuItem(
                 CoreOracleMenus.OrganizationManagement.GroupName,
                 l["Menu:OrganizationManagement"],
-                icon: "fas fa-sitemap"
-                //order: identityMenuItem?.Order + 1 ?? 1 // Place it after Identity Management
+                icon: "fas fa-sitemap",
+                order: 3 // Place it after Countries and Province/City
             );
             context.Menu.AddItem(organizationManagementMenuItem);
 
@@ -79,11 +99,6 @@ public class CoreOracleMenuContributor : IMenuContributor
 
         if (administration != null)
         {
-            // Remove Identity Management from Administration if we added the custom group
-            //if (identityMenuItem != null && context.Menu.Items.Any(x => x.Name == CoreOracleMenus.OrganizationManagement.GroupName))
-            //{
-            //    administration.Items.Remove(identityMenuItem);
-            //}
             // Move Tenant Management if needed
             var tenantManagementMenuItem = administration.GetMenuItem(TenantManagementMenuNames.GroupName);
             if (tenantManagementMenuItem != null)
@@ -92,6 +107,12 @@ public class CoreOracleMenuContributor : IMenuContributor
                 // Optionally add it back to the main menu or a different group
                 // context.Menu.AddItem(tenantManagementMenuItem);
             }
+
+            // Identity Menu Item
+            administration.SetSubItemOrder(IdentityMenuNames.GroupName, 4);
+
+            // Settings Menu Item
+            administration.SetSubItemOrder(SettingManagementMenuNames.GroupName, 5);
         }
     }
 }

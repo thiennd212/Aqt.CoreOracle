@@ -1,0 +1,21 @@
+@page "/Countries/EditModal"
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Modal
+@using Aqt.CoreOracle.Localization
+@using Aqt.CoreOracle.Web.Pages.Countries
+@model EditModalModel
+@inject IHtmlLocalizer<CoreOracleResource> L
+@{
+    Layout = null; // This is a partial view, no layout needed
+}
+<abp-dynamic-form abp-model="Country" asp-page="/Countries/EditModal"> 
+    <abp-modal>
+        <abp-modal-header title="@L["EditCountry"].Value"></abp-modal-header>
+        <abp-modal-body>
+            @* Id is needed for the request but shouldn't be displayed in the form *@
+            <input type="hidden" asp-for="Id" /> 
+            <abp-form-content />
+        </abp-modal-body>
+        <abp-modal-footer buttons="@(AbpModalButtons.Cancel | AbpModalButtons.Save)"></abp-modal-footer>
+    </abp-modal>
+</abp-dynamic-form> 

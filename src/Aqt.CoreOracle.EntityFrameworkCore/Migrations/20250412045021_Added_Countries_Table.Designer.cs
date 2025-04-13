@@ -3,6 +3,7 @@ using System;
 using Aqt.CoreOracle.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Aqt.CoreOracle.Migrations
 {
     [DbContext(typeof(CoreOracleDbContext))]
-    partial class CoreOracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250412045021_Added_Countries_Table")]
+    partial class Added_Countries_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,78 +222,6 @@ namespace Aqt.CoreOracle.Migrations
                     b.HasIndex("Code");
 
                     b.ToTable("AppPositions", (string)null);
-                });
-
-            modelBuilder.Entity("Aqt.CoreOracle.Domain.Provinces.Entities.Province", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("RAW(16)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("NVARCHAR2(10)")
-                        .HasColumnName("Code");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasMaxLength(40)
-                        .HasColumnType("NVARCHAR2(40)")
-                        .HasColumnName("ConcurrencyStamp");
-
-                    b.Property<Guid>("CountryId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("CountryId");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("CreationTime");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("CreatorId");
-
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("DeleterId");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("DeletionTime");
-
-                    b.Property<string>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("ExtraProperties");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BOOLEAN")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("LastModificationTime");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("RAW(16)")
-                        .HasColumnName("LastModifierId");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("NVARCHAR2(256)")
-                        .HasColumnName("Name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name");
-
-                    b.HasIndex("CountryId", "Code")
-                        .IsUnique();
-
-                    b.ToTable("AppProvinces", (string)null);
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>
@@ -2137,17 +2068,6 @@ namespace Aqt.CoreOracle.Migrations
                     b.Navigation("Position");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Aqt.CoreOracle.Domain.Provinces.Entities.Province", b =>
-                {
-                    b.HasOne("Aqt.CoreOracle.Domain.Countries.Entities.Country", "Country")
-                        .WithMany()
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Country");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>
